@@ -1,0 +1,6 @@
+{
+  "region": "us-east-1",
+  "bucket": "og-simple-app-bucket",
+  "appName": "SimpleApp",
+  "ddbTable": "Users"
+}

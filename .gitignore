@@ -1,0 +1,8 @@
+**/dist
+**/node_modules
+**/tests
+**/.env
+**/deploy.env
+**/context.json
+**/event.json
+**/build

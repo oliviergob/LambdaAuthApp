@@ -1,0 +1,58 @@
+{
+      "AWSTemplateFormatVersion" : "2010-09-09",
+      "Parameters" : {
+        "BucketNameParam" : {
+          "Type" : "String",
+          "Description" : "Enter the name of the bucket to be created"
+        },
+        "DDBTableName": {
+          "Type" : "String",
+          "Description" : "Enter the name of the bucket to be created"
+        }
+      },
+      "Resources" : {
+          "S3Bucket" : {
+             "Type" : "AWS::S3::Bucket",
+             "Properties" : {
+                 "BucketName" : { "Ref" : "BucketNameParam" },
+                 "AccessControl" : "PublicRead",
+                 "WebsiteConfiguration" : {
+                     "IndexDocument" : "index.html",
+                     "ErrorDocument" : "error.html"
+                 }
+             }
+          },
+          "myDynamoDBTable" : {
+            "Type" : "AWS::DynamoDB::Table",
+            "Properties" : {
+              "TableName" : { "Ref" : "DDBTableName" },
+              "AttributeDefinitions" : [
+                {
+                  "AttributeName" : "login",
+                  "AttributeType" : "S"
+                }
+              ],
+              "KeySchema" : [
+                {
+                    "AttributeName" : "login",
+                  "KeyType" : "HASH"
+                }
+              ],
+              "ProvisionedThroughput" : {
+                "ReadCapacityUnits" : "1",
+                "WriteCapacityUnits" : "1"
+              }
+            }
+          }
+      },
+      "Outputs" : {
+          "WebsiteURL" : {
+                "Value" : { "Fn::GetAtt" : [ "S3Bucket", "WebsiteURL" ] },
+                "Description" : "URL for website hosted on S3"
+          },
+          "S3BucketSecureURL" : {
+                "Value" : { "Fn::Join" : [ "", [ "https://", { "Fn::GetAtt" : [ "S3Bucket", "DomainName" ] } ] ] },
+                "Description" : "Name of S3 bucket to hold website content"
+          }
+      }
+}

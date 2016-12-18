@@ -1,0 +1,14 @@
+{
+  "name": "basicDataAccess",
+  "version": "0.0.1",
+  "description": "A dummy LambdaFunction returning a JSON",
+  "author": "Olivier Gobilliard  <olivier.gob@gmail.com>",
+  "repository": {
+  "type": "git",
+  "url": "https://gitlab.com/Gobs/LambdaAuthApp"
+  },
+  "main": "index.js",
+  "dependencies": {
+  },
+  "license": "MIT"
+}
