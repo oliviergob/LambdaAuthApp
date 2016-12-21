@@ -28,7 +28,7 @@ bucketName=$appNameLowerCase.$(jq -r '.bucket' config.json)
 
 echo "Sync www content with S3 bucket $bucketName begin..."
 cd www
-aws s3 sync . s3://$bucketName --acl public-read
+aws s3 sync . s3://$bucketName --acl public-read --delete
 cd ..
 echo "Sync www content with S3 bucket $bucketName end"
 

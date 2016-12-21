@@ -3,11 +3,13 @@ console.log('Loading function');
 exports.handler = (event, context, callback) => {
 	var key = event.key;
 
+
 	validateMandatoryParam(key, 'key', callback);
 
 	var data = {
+			httpStatus : 200,
       type: "Basic User Data",
-      Value: "Some not very important data"
+      value: "Some not very important data"
     };
 
 
@@ -25,7 +27,7 @@ exports.handler = (event, context, callback) => {
 					requestId : context.awsRequestId,
 					message : errorMessage
 			}
-			callback(JSON.stringify(myErrorObj));
+			callback(null,myErrorObj);
 			return;
 		}
 	}

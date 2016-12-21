@@ -6,8 +6,9 @@ exports.handler = (event, context, callback) => {
 	validateMandatoryParam(key, 'key', callback);
 
 	var data = {
+			httpStatus : 200,
       type: "Admin User Data",
-      Value: "Some super important data"
+      value: "Some super important data"
     };
 
 	callback(null, data);
@@ -24,7 +25,7 @@ exports.handler = (event, context, callback) => {
 					requestId : context.awsRequestId,
 					message : errorMessage
 			}
-			callback(JSON.stringify(myErrorObj));
+			callback(myErrorObj);
 			return;
 		}
 	}
