@@ -11,7 +11,7 @@
     <script src="./libs/moment.min.js"></script>
     <script src="./libs/aws/aws-cognito-sdk.min.js"></script>
     <script src="./libs/aws/amazon-cognito-identity.min.js"></script>
-    <script src="./libs/aws/aws-sdk.min.js"></script>
+    <script src="./libs/aws/aws-sdk-2.7.19.min.js"></script>
     <script type="text/javascript" src="./libs/aws/gateway/lib/axios/dist/axios.standalone.js"></script>
     <script type="text/javascript" src="./libs/aws/gateway/lib/CryptoJS/rollups/hmac-sha256.js"></script>
     <script type="text/javascript" src="./libs/aws/gateway/lib/CryptoJS/rollups/sha256.js"></script>
@@ -35,6 +35,7 @@
             <ul class="nav navbar-nav" >
               <li class="active" ><a href="#" onclick="loadBasicData()">Basic Data</a></li>
               <li><a href="#" onclick="loadSensitiveData()">Sensitive Data</a></li>
+              <li><a href="#" onclick="regsiterUser()">New User</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
               <li id="login"></li>
@@ -81,6 +82,32 @@
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
       </div>
+    </div>
+
+    <div class="container" id="registerUserContainer">
+      <div class="col-sm-12" style="margin-bottom: 50px;">
+        <h1>Register New User</h1>
+        <form id="register">
+          <div class="form-group">
+            <label>Username</label>
+            <input class="form-control" type="text" id="username" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input class="form-control" type="password" id="password" />
+          </div>
+          <div class="form-group">
+            <label>email</label>
+            <input class="form-control" type="text" id="email" />
+          </div>
+          <div class="form-group">
+            <label>role</label>
+            <input class="form-control" type="text" id="role" />
+          </div>
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+      </div>
+    </div>
 
     <script src="./js/app.js"></script>
   </body>
