@@ -41,6 +41,7 @@ function updateAuthenticationStatus(){
 function loadBasicData(){
   $('#sensitiveDataContainer').hide();
   $('#loginContainer').hide();
+  $('#registerUserContainer').hide();
   $('#basicDataContainer').show();
 
 
@@ -77,15 +78,34 @@ function loadBasicData(){
 function loadSensitiveData(){
   $('#basicDataContainer').hide();
   $('#loginContainer').hide();
+  $('#registerUserContainer').hide();
   $('#sensitiveDataContainer').show();
 }
 
+function manageUsers(){
+  $('#basicDataContainer').hide();
+  $('#loginContainer').hide();
+  $('#sensitiveDataContainer').hide();
+  $('#registerUserContainer').hide();
+  $('#manageUsersContainer').show();
+}
 
 function login(){
   $('#basicDataContainer').hide();
   $('#loginContainer').show();
   $('#sensitiveDataContainer').hide();
+  $('#registerUserContainer').hide();
 }
+
+function regsiterUser(){
+  $('#basicDataContainer').hide();
+  $('#loginContainer').hide();
+  $('#sensitiveDataContainer').hide();
+  $('#registerUserContainer').show();
+}
+
+
+
 
 $('#signin').submit(function(e){
   e.preventDefault();
@@ -118,4 +138,49 @@ $('#signin').submit(function(e){
       console.log("error authenticating user"+err);
     }
   });
+})
+
+
+$('#register').submit(function(e){
+  e.preventDefault();
+  var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
+
+  var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool({
+    UserPoolId : 'us-east-1_j18XflhDT',
+    ClientId : '7lhd9srvjsdfmnc23oribgjcir'
+  });
+
+  var username = document.forms['register'].elements["username"].value;
+  var password = document.forms['register'].elements["password"].value;
+  var email = document.forms['register'].elements["email"].value;
+  var role = document.forms['register'].elements["role"].value;
+
+  var attributeList = [];
+
+  var dataEmail = {
+      Name : 'email',
+      Value : email
+  };
+  var dataRole = {
+      Name : 'role',
+      Value : role
+  };
+  var params = {
+    UserPoolId: 'us-east-1_j18XflhDT',
+    Username: username,
+    DesiredDeliveryMediums: ['EMAIL' ],
+    ForceAliasCreation: false,
+    TemporaryPassword: password,
+    UserAttributes: [
+      {
+        Name: 'email',
+        Value: email
+      }
+    ]
+  };
+  cognitoidentityserviceprovider.adminCreateUser(params, function(err, data) {
+    if (err) console.log(err, err.stack); // an error occurred
+    else     console.log(data);           // successful response
+  });
+
 })
