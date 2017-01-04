@@ -5,10 +5,16 @@
           "Type" : "String",
           "Description" : "Enter the name of the bucket to be created"
         },
-        "DDBTableName": {
+        "CognidoIdentityPoolIdParam" : {
           "Type" : "String",
-          "Description" : "Enter the name of the bucket to be created"
-        }
+          "Description" : "Cognito Identity Pool Id",
+          "Default" : "us-east-1:80561d71-faa2-46b1-9cec-dc03226b7f12",
+        },
+        "CognidoUserPoolArnParam" : {
+          "Type" : "String",
+          "Description" : "Cognito User Pool arn",
+          "Default" : "arn:aws:cognito-idp:us-east-1:546190104433:userpool/us-east-1_j18XflhDT",
+        },
       },
       "Resources" : {
           "S3Bucket" : {
@@ -22,27 +28,109 @@
                  }
              }
           },
-          "myDynamoDBTable" : {
-            "Type" : "AWS::DynamoDB::Table",
-            "Properties" : {
-              "TableName" : { "Ref" : "DDBTableName" },
-              "AttributeDefinitions" : [
-                {
-                  "AttributeName" : "login",
-                  "AttributeType" : "S"
-                }
-              ],
-              "KeySchema" : [
-                {
-                    "AttributeName" : "login",
-                  "KeyType" : "HASH"
-                }
-              ],
-              "ProvisionedThroughput" : {
-                "ReadCapacityUnits" : "1",
-                "WriteCapacityUnits" : "1"
-              }
-            }
+          "SimpleAuthAppBasicUserRole": {
+             "Type": "AWS::IAM::Role",
+             "Properties": {
+               "AssumeRolePolicyDocument": {
+                  "Version" : "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Federated": "cognito-identity.amazonaws.com"
+                      },
+                      "Action": "sts:AssumeRoleWithWebIdentity",
+                      "Condition": {
+                        "StringEquals": {
+                          "cognito-identity.amazonaws.com:aud": { "Ref" : "CognidoIdentityPoolIdParam" }
+                        }
+                      }
+                    }
+                  ]
+               },
+              "RoleName": "SimpleAuthAppBasicUserRole"
+             }
+          },
+          "SimpleAuthAppAdminRole": {
+             "Type": "AWS::IAM::Role",
+             "Properties": {
+               "AssumeRolePolicyDocument": {
+                  "Version" : "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Federated": "cognito-identity.amazonaws.com"
+                      },
+                      "Action": "sts:AssumeRoleWithWebIdentity",
+                      "Condition": {
+                        "StringEquals": {
+                          "cognito-identity.amazonaws.com:aud": { "Ref" : "CognidoIdentityPoolIdParam" }
+                        }
+                      }
+                    }
+                  ]
+               },
+              "RoleName": "SimpleAuthAppAdminRole"
+             }
+          },
+          "AllowInvokeBasicDataAccessPolicy":{
+             "Type" : "AWS::IAM::ManagedPolicy",
+             "Properties" : {
+                "PolicyDocument" : {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Action": [
+                              "lambda:InvokeFunction"
+                          ],
+                          "Resource": [
+                              "arn:aws:lambda:us-east-1:546190104433:function:basicDataAccess-development"
+                          ]
+                      }
+                  ]
+                },
+                "Roles" : [ { "Ref" : "SimpleAuthAppBasicUserRole" }, { "Ref" : "SimpleAuthAppAdminRole" } ]
+             }
+          },
+          "AllowInvokeAdminDataAccessPolicy":{
+             "Type" : "AWS::IAM::ManagedPolicy",
+             "Properties" : {
+                "PolicyDocument" : {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Action": [
+                              "lambda:InvokeFunction"
+                          ],
+                          "Resource": [
+                              "arn:aws:lambda:us-east-1:546190104433:function:adminDataAccess-development"
+                          ]
+                      }
+                  ]
+                },
+                "Roles" : [ { "Ref" : "SimpleAuthAppAdminRole" } ]
+             }
+          },
+          "AllowManageUsers":{
+             "Type" : "AWS::IAM::ManagedPolicy",
+             "Properties" : {
+                "PolicyDocument" : {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Action": [
+                              "cognito-idp:AdminCreateUser"
+                          ],
+                          "Resource": { "Ref" : "CognidoUserPoolArnParam" }
+                      }
+                  ]
+                },
+                "Roles" : [ { "Ref" : "SimpleAuthAppAdminRole" } ]
+             }
           }
       },
       "Outputs" : {
