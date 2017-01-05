@@ -24,7 +24,11 @@ region=$(jq -r '.region' config.json)
 appName=$(jq -r '.appName' config.json)
 appNameLowerCase=$(echo "$appName" | tr '[:upper:]' '[:lower:]')
 bucketName=$appNameLowerCase.$(jq -r '.bucket' config.json)
-awsAccountNumber=$(jq -r '.awsAccountNumber' config.json)
+adminEmail=$(jq -r '.adminEmail' config.json)
+adminTempPassword=$(jq -r '.adminTempPassword' config.json)
+
+# Getting the account number for later user
+awsAccountNumber=`aws sts get-caller-identity --output text --query 'Account'`
 
 
 # Verifying the bucket name is Valid
@@ -43,14 +47,23 @@ scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 scriptDir="file://${scriptDir//////}//cloudformation//simpleApp.json"
 
 echo Creating Cognito User pool
-userPoolId=`aws cognito-idp create-user-pool --pool-name ${appName}UserPool --auto-verified-attributes email --admin-create-user-config AllowAdminCreateUserOnly=true --schema  '[{"Name":"name","Required":true}, {"Name":"email","Required":true}]' | jq -r '.UserPool.Id'`
+userPoolId=`aws cognito-idp create-user-pool \
+                --pool-name ${appName}UserPool \
+                --auto-verified-attributes email \
+                --admin-create-user-config AllowAdminCreateUserOnly=true \
+                --schema  '[{"Name":"name","Required":true}, {"Name":"email","Required":true}]' | jq -r '.UserPool.Id'`
 userPoolArn="arn:aws:cognito-idp:$region:$awsAccountNumber:userpool/$userPoolId"
-userPoolClientId=$(aws cognito-idp create-user-pool-client --user-pool-id $userPoolId --client-name ${appName} | jq -r '.UserPoolClient.ClientId')
+userPoolClientId=$(aws cognito-idp create-user-pool-client \
+                       --user-pool-id $userPoolId \
+                       --client-name ${appName} | jq -r '.UserPoolClient.ClientId')
 echo "Created User Pool ${appName}UserPool with ARN $userPoolArn and client ID $userPoolClientId"
 
 echo
 echo Creating Cognito Identity Pool
-identityPoolId=`aws cognito-identity create-identity-pool --identity-pool-name ${appName}IdPool --no-allow-unauthenticated-identities --cognito-identity-providers ProviderName=cognito-idp.$region.amazonaws.com/$userPoolId,ClientId=$userPoolClientId | jq -r '.IdentityPoolId'`
+identityPoolId=`aws cognito-identity create-identity-pool \
+                    --identity-pool-name ${appName}IdPool \
+                    --no-allow-unauthenticated-identities \
+                    --cognito-identity-providers ProviderName=cognito-idp.$region.amazonaws.com/$userPoolId,ClientId=$userPoolClientId | jq -r '.IdentityPoolId'`
 echo "Created Identity Pool Id ${appName}IdPool with ID $identityPoolId"
 
 # Create S3 Bucket
@@ -75,14 +88,45 @@ aws cloudformation wait stack-create-complete \
     --stack-name $appName \
     --region $region
 
-#TODO handle errors
+if [[ $? != 0 ]]; then
+  echo "Login to cloudformation front end and have a look at the event logs"
+  exit 1
+fi
+
+echo "Cloudformation Stack now fully created"
+
+stackOutput=`aws cloudformation describe-stacks \
+    --stack-name $appName \
+    --region $region | jq -r '.Stacks[0].Outputs[] | .OutputKey +"="+ .OutputValue'`
+
+eval $stackOutput
 
 echo
 echo Associating Identity Pool with IAM Roles
-# TODO - get the roles from cloudformation outputs
-aws cognito-identity set-identity-pool-roles --identity-pool-id $identityPoolId --roles authenticated=arn:aws:iam::546190104433:role/SimpleAuthAppBasicUserRole --role-mappings "{\"cognito-idp.$region.amazonaws.com/$userPoolId:$userPoolClientId\": {\"Type\" : \"Token\", \"AmbiguousRoleResolution\": \"AuthenticatedRole\" } }"
-exit
+aws cognito-identity set-identity-pool-roles --identity-pool-id $identityPoolId --roles authenticated=$BasicUserRoleArn --role-mappings "{\"cognito-idp.$region.amazonaws.com/$userPoolId:$userPoolClientId\": {\"Type\" : \"Token\", \"AmbiguousRoleResolution\": \"AuthenticatedRole\" } }"
 
-echo "Stack now fully created"
+echo
+echo Creating Admin Group
+ aws cognito-idp create-group \
+      --user-pool-id $userPoolId \
+      --group-name AdminGroup \
+      --role-arn $AdminRoleArn > /dev/null
+
+echo
+echo Creating Admin user
+aws cognito-idp admin-create-user \
+    --user-pool-id $userPoolId \
+    --username admin \
+    --temporary-password $adminTempPassword \
+    --user-attributes Name=email,Value=$adminEmail > /dev/null
+
+aws cognito-idp admin-add-user-to-group \
+     --user-pool-id $userPoolId \
+     --username admin \
+     --group-name AdminGroup > /dev/null
+
+ exit
+
+
 
 #./deploy.sh

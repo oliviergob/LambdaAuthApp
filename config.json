@@ -1,7 +1,7 @@
 {
   "region": "us-east-1",
-  "awsAccountNumber": "546190104433",
   "bucket": "og-simple-app-bucket",
   "appName": "SimpleAuthApp",
-  "ddbTable": "Users"
+  "adminEmail": "olivier.test@domain.com",
+  "adminTempPassword": "XXXXXXXXX"
 }

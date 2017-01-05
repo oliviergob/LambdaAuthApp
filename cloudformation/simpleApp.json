@@ -48,7 +48,7 @@
                     }
                   ]
                },
-              "RoleName": "SimpleAuthAppBasicUserRole"
+              "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "BasicUserRole" ] ] },
              }
           },
           "SimpleAuthAppAdminRole": {
@@ -71,7 +71,7 @@
                     }
                   ]
                },
-              "RoleName": "SimpleAuthAppAdminRole"
+              "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "AdminRole" ] ] },
              }
           },
           "AllowInvokeBasicDataAccessPolicy":{
@@ -141,6 +141,14 @@
           "S3BucketSecureURL" : {
                 "Value" : { "Fn::Join" : [ "", [ "https://", { "Fn::GetAtt" : [ "S3Bucket", "DomainName" ] } ] ] },
                 "Description" : "Name of S3 bucket to hold website content"
+          },
+          "BasicUserRoleArn" : {
+                "Value" : { "Fn::GetAtt" : [ "SimpleAuthAppBasicUserRole", "Arn" ] },
+                "Description" : "Basic User Role Arn"
+          },
+          "AdminRoleArn" : {
+                "Value" : { "Fn::GetAtt" : [ "SimpleAuthAppAdminRole", "Arn" ] },
+                "Description" : "Admin User Role Arn"
           }
       }
 }
