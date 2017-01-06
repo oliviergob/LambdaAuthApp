@@ -66,6 +66,16 @@ identityPoolId=`aws cognito-identity create-identity-pool \
                     --cognito-identity-providers ProviderName=cognito-idp.$region.amazonaws.com/$userPoolId,ClientId=$userPoolClientId | jq -r '.IdentityPoolId'`
 echo "Created Identity Pool Id ${appName}IdPool with ID $identityPoolId"
 
+echo
+echo Creating www/config.json
+jq --arg identityPoolId $identityPoolId \
+   --arg userPoolId $userPoolId \
+   --arg userPoolClientId $userPoolClientId \
+   --arg region $region \
+  '.["identityPoolId"]=$identityPoolId | .["userPoolId"]=$userPoolId | .["userPoolClientId"]=$userPoolClientId | .["region"]=$region ' \
+  <www-config.json.template >www/config.json
+
+
 # Create S3 Bucket
 echo
 echo Creating cloudformation stack $appName in $region to create:
@@ -124,6 +134,8 @@ aws cognito-idp admin-add-user-to-group \
      --user-pool-id $userPoolId \
      --username admin \
      --group-name AdminGroup > /dev/null
+
+
 
  exit
 
