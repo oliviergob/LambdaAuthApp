@@ -1,8 +1,8 @@
 var config = {
-  "identityPoolId": "us-east-1:803e2a12-abf9-4114-8d84-0be3ce40af06",
-  "userPoolId": "us-east-1_O2Pf8opZm",
-  "userPoolClientId": "7kmh7han80s0iv80i7vg268pvr",
-  "region": "us-east-1"
+  "identityPoolId": "IDPOOL",
+  "userPoolId": "USERPOOLID",
+  "userPoolClientId": "USERPOOLCLIENT",
+  "region": "AWSREGION"
 }
 
 var logins = {}
@@ -15,9 +15,7 @@ AWS.config.credentials = new AWS.CognitoIdentityCredentials({
 });
 
 
-
 var lambda = new AWS.Lambda();
-
 
 $(".nav li").on("click", function() {
     $(".nav li").removeClass("active");

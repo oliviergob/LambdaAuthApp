@@ -67,14 +67,12 @@ identityPoolId=`aws cognito-identity create-identity-pool \
 echo "Created Identity Pool Id ${appName}IdPool with ID $identityPoolId"
 
 echo
-echo Creating www/config.json
-jq --arg identityPoolId $identityPoolId \
-   --arg userPoolId $userPoolId \
-   --arg userPoolClientId $userPoolClientId \
-   --arg region $region \
-  '.["identityPoolId"]=$identityPoolId | .["userPoolId"]=$userPoolId | .["userPoolClientId"]=$userPoolClientId | .["region"]=$region ' \
-  <www-config.json.template >www/config.json
+echo Creating www/js/app.js
 
+sed  -e "s/IDPOOL/$identityPoolId/g" templates/app.js | \
+     sed  -e "s/USERPOOLID/$userPoolId/g" | \
+     sed  -e "s/USERPOOLCLIENT/$userPoolClientId/g" | \
+     sed  -e "s/AWSREGION/$region/g" > www/js/app.js
 
 # Create S3 Bucket
 echo
