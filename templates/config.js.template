@@ -1,0 +1,6 @@
+var config = {
+  "identityPoolId": "IDPOOL",
+  "userPoolId": "USERPOOLID",
+  "userPoolClientId": "USERPOOLCLIENT",
+  "region": "AWSREGION"
+}

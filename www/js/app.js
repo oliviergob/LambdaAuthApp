@@ -1,18 +1,24 @@
-var config = {
-  "identityPoolId": "us-east-1:803e2a12-abf9-4114-8d84-0be3ce40af06",
-  "userPoolId": "us-east-1_O2Pf8opZm",
-  "userPoolClientId": "7kmh7han80s0iv80i7vg268pvr",
-  "region": "us-east-1"
-}
 
-var logins = {}
-logins['cognito-idp.'+config.region+'.amazonaws.com/'+config.userPoolId] = JSON.parse(localStorage.getItem('token'))
 
 AWS.config.region = config.region; // Region
-AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-    IdentityPoolId: config.identityPoolId,
-    Logins: logins
-});
+var username;
+if(localStorage.getItem('token'))
+{
+  var logins = {}
+  logins['cognito-idp.'+config.region+'.amazonaws.com/'+config.userPoolId] = JSON.parse(localStorage.getItem('token'))
+
+  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: config.identityPoolId,
+      Logins: logins
+  });
+
+  // Parsing the identity token to get the username
+  var token = localStorage.getItem('token');
+  var base64Url = token.split('.')[1];
+  var base64 = base64Url.replace('-', '+').replace('_', '/');
+  username = (JSON.parse(window.atob(base64)))["cognito:username"];
+}
+
 
 
 
@@ -39,7 +45,7 @@ function updateAuthenticationStatus(){
   $('#login').empty();
   var user = localStorage.getItem('token');
   if(user){
-    $('#user').show().append('<a href="#" onclick="logout()">Log out</a>');
+    $('#user').show().append('<a href="#" onclick="logout()">Log out ('+username+')</a>');
     $('#login').hide();
   } else {
     $('#login').show().append('<a href="#"onclick="login()">Log in</a>');
@@ -55,11 +61,8 @@ function loadBasicData(){
   $('#basicDataContainer').show();
 
 
-
-  var myNode = document.getElementById("basicData");
-  while (myNode.firstChild) {
-      myNode.removeChild(myNode.firstChild);
-  }
+  // Clearing previous messages
+  $('#basicData').empty();
 
   if(localStorage.getItem('token')){
 
@@ -69,7 +72,6 @@ function loadBasicData(){
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
-          console.dir(error);
           $('#basicData').append('<div class="alert alert-danger">Error retreiving data</div>')
         }
         else {
@@ -90,14 +92,30 @@ function loadSensitiveData(){
   $('#loginContainer').hide();
   $('#registerUserContainer').hide();
   $('#sensitiveDataContainer').show();
-}
 
-function manageUsers(){
-  $('#basicDataContainer').hide();
-  $('#loginContainer').hide();
-  $('#sensitiveDataContainer').hide();
-  $('#registerUserContainer').hide();
-  $('#manageUsersContainer').show();
+  // Clearing previous messages
+  $('#sensitiveData').empty();
+
+  if(localStorage.getItem('token')){
+
+    var event={key:"randomKey"};
+    lambda.invoke({
+        FunctionName: 'adminDataAccess-development',
+        Payload: JSON.stringify(event, null, 2) // pass params
+      }, function(error, data) {
+        if (error) {
+          $('#sensitiveData').append('<div class="alert alert-danger">Error retreiving data</div>')
+        }
+        else {
+          data=JSON.parse(data.Payload);
+          if(data.httpStatus == 200){
+            $('#sensitiveData').append('<div class="alert alert-success">'+ data.value +'</div>')
+          } else {
+            $('#sensitiveData').append('<div class="alert alert-danger">'+ data.message +'</div>')
+          }
+        }
+      });
+  }
 }
 
 function login(){
@@ -111,7 +129,14 @@ function regsiterUser(){
   $('#basicDataContainer').hide();
   $('#loginContainer').hide();
   $('#sensitiveDataContainer').hide();
+
+  $('#registerMessage').empty();
+  $('#register').trigger("reset");
+  $("#register :input").prop("disabled", false);
+
   $('#registerUserContainer').show();
+
+
 }
 
 
@@ -152,6 +177,7 @@ $('#signin').submit(function(e){
 
 
 $('#register').submit(function(e){
+  $('#registerMessage').empty();
   e.preventDefault();
   var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
 
@@ -163,17 +189,12 @@ $('#register').submit(function(e){
   var username = document.forms['register'].elements["username"].value;
   var password = document.forms['register'].elements["password"].value;
   var email = document.forms['register'].elements["email"].value;
-  var role = document.forms['register'].elements["role"].value;
 
   var attributeList = [];
 
   var dataEmail = {
       Name : 'email',
       Value : email
-  };
-  var dataRole = {
-      Name : 'role',
-      Value : role
   };
   var params = {
     UserPoolId: config.userPoolId,
@@ -189,8 +210,17 @@ $('#register').submit(function(e){
     ]
   };
   cognitoidentityserviceprovider.adminCreateUser(params, function(err, data) {
-    if (err) console.log(err, err.stack); // an error occurred
-    else     console.log(data);           // successful response
+    if (err)
+    {
+      $('#registerMessage').append('<div class="alert alert-danger">Error while creating the user</div>')
+    }
+    else
+    {
+        $('#registerMessage').append('<div class="alert alert-success">User successfuly created</div>')
+        $("#register :input").prop("disabled", true);
+    }
   });
+
+
 
 })

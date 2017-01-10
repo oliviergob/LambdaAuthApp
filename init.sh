@@ -69,10 +69,10 @@ echo "Created Identity Pool Id ${appName}IdPool with ID $identityPoolId"
 echo
 echo Creating www/js/app.js
 
-sed  -e "s/IDPOOL/$identityPoolId/g" templates/app.js | \
+sed  -e "s/IDPOOL/$identityPoolId/g" templates/config.js.template | \
      sed  -e "s/USERPOOLID/$userPoolId/g" | \
      sed  -e "s/USERPOOLCLIENT/$userPoolClientId/g" | \
-     sed  -e "s/AWSREGION/$region/g" > www/js/app.js
+     sed  -e "s/AWSREGION/$region/g" > www/js/config.js
 
 # Create S3 Bucket
 echo

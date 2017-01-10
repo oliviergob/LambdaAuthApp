@@ -1,7 +1,0 @@
-{
-  "region": "us-east-1",
-  "bucket": "og-simple-app-bucket",
-  "appName": "SimpleAuthApp",
-  "adminEmail": "olivier.test@domain.com",
-  "adminTempPassword": "XXXXXXXXX"
-}

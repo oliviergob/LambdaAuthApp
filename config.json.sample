@@ -1,0 +1,7 @@
+{
+  "region": "us-east-1",
+  "bucket": "unique-bucket-name",
+  "appName": "SimpleAuthApp",
+  "adminEmail": "name@domain.com",
+  "adminTempPassword": "complicateDpW!!!"
+}
