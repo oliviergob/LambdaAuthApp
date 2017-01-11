@@ -1,6 +1,7 @@
 
 
 AWS.config.region = config.region; // Region
+AWSCognito.config.region = config.region;
 var username;
 if(localStorage.getItem('token'))
 {
@@ -58,6 +59,8 @@ function loadBasicData(){
   $('#sensitiveDataContainer').hide();
   $('#loginContainer').hide();
   $('#registerUserContainer').hide();
+  $('#resetPasswordContainer').hide();
+  $('#forgotPasswordContainer').hide();
   $('#basicDataContainer').show();
 
 
@@ -91,7 +94,10 @@ function loadSensitiveData(){
   $('#basicDataContainer').hide();
   $('#loginContainer').hide();
   $('#registerUserContainer').hide();
+  $('#resetPasswordContainer').hide();
+  $('#forgotPasswordContainer').hide();
   $('#sensitiveDataContainer').show();
+
 
   // Clearing previous messages
   $('#sensitiveData').empty();
@@ -123,12 +129,16 @@ function login(){
   $('#loginContainer').show();
   $('#sensitiveDataContainer').hide();
   $('#registerUserContainer').hide();
+  $('#resetPasswordContainer').hide();
+  $('#forgotPasswordContainer').hide();
 }
 
 function regsiterUser(){
   $('#basicDataContainer').hide();
   $('#loginContainer').hide();
   $('#sensitiveDataContainer').hide();
+  $('#resetPasswordContainer').hide();
+  $('#forgotPasswordContainer').hide();
 
   $('#registerMessage').empty();
   $('#register').trigger("reset");
@@ -139,6 +149,62 @@ function regsiterUser(){
 
 }
 
+function forgotPassword(){
+  $('#basicDataContainer').hide();
+  $('#loginContainer').hide();
+  $('#sensitiveDataContainer').hide();
+  $('#registerUserContainer').hide();
+  $('#resetPasswordContainer').hide();
+
+  $('#forgotPasswordMessage').empty();
+  $('#forgotPassword').trigger("reset");
+  $("#forgotPassword :input").prop("disabled", false);
+
+  $('#forgotPasswordContainer').show();
+}
+
+
+
+function resetPassword(){
+
+  $('#basicDataContainer').hide();
+  $('#loginContainer').hide();
+  $('#sensitiveDataContainer').hide();
+  $('#registerUserContainer').hide();
+
+  $('#resetPasswordMessage').empty();
+  $('#resetPassword').trigger("reset");
+  $("#resetPassword :input").prop("disabled", false);
+
+  $('#resetPasswordContainer').show();
+}
+
+$('#forgotPassword').submit(function(e){
+  // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
+  AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'});
+
+  var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool({
+    UserPoolId : config.userPoolId,
+    ClientId : config.userPoolClientId
+  });
+
+  var userData = {
+      Username : $('#username').val(),
+      Pool : userPool
+  };
+
+  var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
+  cognitoUser.forgotPassword({
+        onSuccess: function (result) {
+            console.log('call result: ' + result);
+            console.dir(result);
+            resetPassword();
+        },
+        onFailure: function(err) {
+            alert(err);
+        },
+    });
+});
 
 
 
