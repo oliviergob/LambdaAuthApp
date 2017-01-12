@@ -35,7 +35,6 @@ rm config.js
 cd ..
 aws s3 sync . s3://$bucketName --acl public-read --delete
 cd ..
-rm -rf build
 echo "Sync www content with S3 bucket $bucketName end"
 
 cd functions

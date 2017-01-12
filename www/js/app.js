@@ -18,9 +18,10 @@ if(localStorage.getItem('token'))
   var base64Url = token.split('.')[1];
   var base64 = base64Url.replace('-', '+').replace('_', '/');
   username = (JSON.parse(window.atob(base64)))["cognito:username"];
+
+  //TODO - Verify the token is still valid and we actually managed to get credentials
+
 }
-
-
 
 
 var lambda = new AWS.Lambda();
@@ -61,6 +62,7 @@ function loadBasicData(){
   $('#registerUserContainer').hide();
   $('#resetPasswordContainer').hide();
   $('#forgotPasswordContainer').hide();
+  $('#changePasswordContainer').hide();
   $('#basicDataContainer').show();
 
 
@@ -96,6 +98,7 @@ function loadSensitiveData(){
   $('#registerUserContainer').hide();
   $('#resetPasswordContainer').hide();
   $('#forgotPasswordContainer').hide();
+  $('#changePasswordContainer').hide();
   $('#sensitiveDataContainer').show();
 
 
@@ -131,6 +134,7 @@ function login(){
   $('#registerUserContainer').hide();
   $('#resetPasswordContainer').hide();
   $('#forgotPasswordContainer').hide();
+  $('#changePasswordContainer').hide();
 }
 
 function regsiterUser(){
@@ -139,6 +143,7 @@ function regsiterUser(){
   $('#sensitiveDataContainer').hide();
   $('#resetPasswordContainer').hide();
   $('#forgotPasswordContainer').hide();
+  $('#changePasswordContainer').hide();
 
   $('#registerMessage').empty();
   $('#register').trigger("reset");
@@ -155,6 +160,7 @@ function forgotPassword(){
   $('#sensitiveDataContainer').hide();
   $('#registerUserContainer').hide();
   $('#resetPasswordContainer').hide();
+  $('#changePasswordContainer').hide();
 
   $('#forgotPasswordMessage').empty();
   $('#forgotPassword').trigger("reset");
@@ -171,6 +177,7 @@ function resetPassword(){
   $('#loginContainer').hide();
   $('#sensitiveDataContainer').hide();
   $('#registerUserContainer').hide();
+  $('#changePasswordContainer').hide();
 
   $('#resetPasswordMessage').empty();
   $('#resetPassword').trigger("reset");
@@ -178,6 +185,40 @@ function resetPassword(){
 
   $('#resetPasswordContainer').show();
 }
+
+
+function changePassword(){
+
+  $('#basicDataContainer').hide();
+  $('#loginContainer').hide();
+  $('#sensitiveDataContainer').hide();
+  $('#registerUserContainer').hide();
+  $('#resetPasswordContainer').hide();
+
+  $('#changePasswordMessage').empty();
+  $('#changePassword').trigger("reset");
+  $("#changePassword :input").prop("disabled", false);
+
+  $('#changePasswordContainer').show();
+}
+
+$('#changePassword').submit(function(e){
+
+  // Getting accessToken from local storage
+  var accessToken = JSON.parse(localStorage.getItem('accessToken'));
+
+  var params = {
+    PreviousPassword: $('#oldPassword').val(),
+    ProposedPassword: $('#newPassword').val(),
+    AccessToken: accessToken
+  };
+  var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
+  cognitoidentityserviceprovider.changePassword(params, function(err, data) {
+    if (err) console.log(err, err.stack); // an error occurred
+    else     console.log(data);           // successful response
+  });
+
+});
 
 $('#forgotPassword').submit(function(e){
   // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
@@ -210,7 +251,6 @@ $('#forgotPassword').submit(function(e){
 
 $('#signin').submit(function(e){
   e.preventDefault();
-  AWSCognito.config.region = 'us-east-1';
   // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
   AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'});
 
@@ -233,12 +273,13 @@ $('#signin').submit(function(e){
   cognitoUser.authenticateUser(authenticationDetails, {
     onSuccess: function (result) {
       localStorage.setItem('token', JSON.stringify(result.idToken.jwtToken));
+      localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
       window.location = '/';
     },
     onFailure: function(err) {
       console.log("error authenticating user"+err);
     }
-  });
+  }); 
 })
 
 

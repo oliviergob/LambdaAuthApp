@@ -67,7 +67,7 @@ identityPoolId=`aws cognito-identity create-identity-pool \
 echo "Created Identity Pool Id ${appName}IdPool with ID $identityPoolId"
 
 echo
-echo Creating www/js/app.js
+echo Creating config file www/js/config.js
 
 sed  -e "s/IDPOOL/$identityPoolId/g" templates/config.js.template | \
      sed  -e "s/USERPOOLID/$userPoolId/g" | \
@@ -78,6 +78,8 @@ sed  -e "s/IDPOOL/$identityPoolId/g" templates/config.js.template | \
 echo
 echo Creating cloudformation stack $appName in $region to create:
 echo "   - S3 bucket $bucketName"
+echo "   - IAM Role SimpleAuthAppAdminRole"
+echo "   - IAM Role SimpleAuthAppBasicUserRole"
 #TODO Add role names as stack parameters
 aws cloudformation create-stack \
     --capabilities CAPABILITY_NAMED_IAM \
@@ -86,7 +88,7 @@ aws cloudformation create-stack \
     --parameters ParameterKey=BucketNameParam,ParameterValue=$bucketName \
                  ParameterKey=CognidoIdentityPoolIdParam,ParameterValue=$identityPoolId \
                  ParameterKey=CognidoUserPoolArnParam,ParameterValue=$userPoolArn \
-    --region $region
+    --region $region >/dev/null
 #TODO handle errors
 
 echo "Waiting for the stack to complete creation, this can take a while"

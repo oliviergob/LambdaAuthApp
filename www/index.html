@@ -25,6 +25,7 @@
               <li class="active" ><a href="#" onclick="loadBasicData()">Basic Data</a></li>
               <li><a href="#" onclick="loadSensitiveData()">Sensitive Data</a></li>
               <li><a href="#" onclick="regsiterUser()">New User</a></li>
+              <li><a href="#" onclick="changePassword()">Change Password</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
               <li id="login"></li>
@@ -108,6 +109,25 @@
         </form>
         <br>
         <div class="row" id="resetPasswordMessage"></div>
+      </div>
+    </div>
+
+    <div class="container" id="changePasswordContainer">
+      <div class="col-sm-4" style="margin-bottom: 50px;">
+        <h1>Change Password</h1>
+        <form id="changePassword">
+          <div class="form-group">
+            <label>Old Password</label>
+            <input class="form-control" type="password" id="oldPassword" />
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input class="form-control" type="password" id="newPassword" />
+          </div>
+          <button type="submit" class="btn btn-default">Change Password</button>
+        </form>
+        <br>
+        <div class="row" id="changePasswordMessage"></div>
       </div>
     </div>
 
