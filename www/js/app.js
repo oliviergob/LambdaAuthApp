@@ -1,25 +1,35 @@
 
 
-AWS.config.region = config.region; // Region
-AWSCognito.config.region = config.region;
-var username;
-if(localStorage.getItem('token'))
+loadCredentials();
+
+function loadCredentials(callback)
 {
-  var logins = {}
-  logins['cognito-idp.'+config.region+'.amazonaws.com/'+config.userPoolId] = JSON.parse(localStorage.getItem('token'))
+  AWS.config.region = config.region; // Region
+  AWSCognito.config.region = config.region;
+  var username;
+  if(localStorage.getItem('token'))
+  {
+    var logins = {}
+    logins['cognito-idp.'+config.region+'.amazonaws.com/'+config.userPoolId] = JSON.parse(localStorage.getItem('token'))
 
-  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: config.identityPoolId,
-      Logins: logins
-  });
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: config.identityPoolId,
+        Logins: logins
+    });
 
-  // Parsing the identity token to get the username
-  var token = localStorage.getItem('token');
-  var base64Url = token.split('.')[1];
-  var base64 = base64Url.replace('-', '+').replace('_', '/');
-  username = (JSON.parse(window.atob(base64)))["cognito:username"];
+    // Parsing the identity token to get the username
+    var token = localStorage.getItem('token');
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace('-', '+').replace('_', '/');
+    username = (JSON.parse(window.atob(base64)))["cognito:username"];
 
-  //TODO - Verify the token is still valid and we actually managed to get credentials
+    //TODO - Verify the token is still valid and we actually managed to get credentials
+
+  }
+  // Make sure the callback is a function​
+   if (typeof callback === "function") {
+       callback();
+   }
 
 }
 
@@ -129,12 +139,21 @@ function loadSensitiveData(){
 
 function login(){
   $('#basicDataContainer').hide();
-  $('#loginContainer').show();
+
   $('#sensitiveDataContainer').hide();
   $('#registerUserContainer').hide();
   $('#resetPasswordContainer').hide();
   $('#forgotPasswordContainer').hide();
   $('#changePasswordContainer').hide();
+
+  $('#signinMessage').empty();
+  $('#signin').trigger("reset");
+  $("#signin :input").prop("disabled", false);
+  $("#signInNewPasswordGroup").hide();
+  $("#updatePasswordButton").hide();
+  $("#loginButton").show();
+
+  $('#loginContainer').show();
 }
 
 function regsiterUser(){
@@ -178,6 +197,7 @@ function resetPassword(){
   $('#sensitiveDataContainer').hide();
   $('#registerUserContainer').hide();
   $('#changePasswordContainer').hide();
+  $('#forgotPasswordContainer').hide();
 
   $('#resetPasswordMessage').empty();
   $('#resetPassword').trigger("reset");
@@ -194,6 +214,7 @@ function changePassword(){
   $('#sensitiveDataContainer').hide();
   $('#registerUserContainer').hide();
   $('#resetPasswordContainer').hide();
+  $('#forgotPasswordContainer').hide();
 
   $('#changePasswordMessage').empty();
   $('#changePassword').trigger("reset");
@@ -278,8 +299,27 @@ $('#signin').submit(function(e){
     },
     onFailure: function(err) {
       console.log("error authenticating user"+err);
+    },
+    newPasswordRequired: function(userAttributes, requiredAttributes) {
+            // User was signed up by an admin and must provide new
+            // password and required attributes, if any, to complete
+            // authentication.
+
+            // the api doesn't accept this field back
+            delete userAttributes.email_verified;
+
+            console.dir(userAttributes);
+
+            $("#Username").prop("disabled", true);
+            $("#Password").prop("disabled", true);
+            $("#signInNewPasswordGroup").show();
+            $("#updatePasswordButton").show();
+            $("#loginButton").hide();
+
+            // Get these details and call
+            //cognitoUser.completeNewPasswordChallenge(newPassword, userAttributes, this);
     }
-  }); 
+  });
 })
 
 

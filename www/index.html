@@ -69,12 +69,18 @@
             <label>Password</label>
             <input class="form-control" type="password" id="password" />
           </div>
-          <button type="submit" class="btn btn-default">Login</button>
+          <div class="form-group" id="signInNewPasswordGroup">
+            <label>NewPassword</label>
+            <input class="form-control" type="password" id="signInNewPassword" />
+          </div>
+          <button id="loginButton" type="submit" class="btn btn-default">Login</button>
+          <button id="updatePasswordButton" type="submit" class="btn btn-default">UpdatePassword</button>
         </form>
         <div class="span12" style="text-align:center">
            <a class=".text-center" href="#" onclick="forgotPassword()">Forgot password?</a>
         </div>
-
+        <br>
+        <div class="row" id="signinMessage"></div>
       </div>
     </div>
 
