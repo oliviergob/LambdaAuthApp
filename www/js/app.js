@@ -1,12 +1,12 @@
 
-
+var username;
 loadCredentials();
 
 function loadCredentials(callback)
 {
   AWS.config.region = config.region; // Region
   AWSCognito.config.region = config.region;
-  var username;
+
   if(localStorage.getItem('token'))
   {
     var logins = {}
@@ -149,7 +149,7 @@ function login(){
   $('#signinMessage').empty();
   $('#signin').trigger("reset");
   $("#signin :input").prop("disabled", false);
-  $("#signInNewPasswordGroup").hide();
+  $("#signinNewPasswordGroup").hide();
   $("#updatePasswordButton").hide();
   $("#loginButton").show();
 
@@ -242,6 +242,10 @@ $('#changePassword').submit(function(e){
 });
 
 $('#forgotPassword').submit(function(e){
+
+  // Emptying previous error messages
+  $('#forgotPasswordMessage').empty();
+
   // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
   AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'});
 
@@ -263,7 +267,7 @@ $('#forgotPassword').submit(function(e){
             resetPassword();
         },
         onFailure: function(err) {
-            alert(err);
+            $('#forgotPasswordMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
         },
     });
 });
@@ -272,6 +276,8 @@ $('#forgotPassword').submit(function(e){
 
 $('#signin').submit(function(e){
   e.preventDefault();
+  // Emptying previous error messages
+  $('#signinMessage').empty();
   // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
   AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'});
 
@@ -281,11 +287,11 @@ $('#signin').submit(function(e){
   });
 
   var authenticationData = {
-    Username : $('#username').val(),
-    Password : $('#password').val(),
+    Username : $('#signinUsername').val(),
+    Password : $('#signinPassword').val(),
   };
   var userData = {
-    Username : $('#username').val(),
+    Username : $('#signinUsername').val(),
     Pool : userPool
   };
   var authenticationDetails = new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
@@ -293,31 +299,51 @@ $('#signin').submit(function(e){
 
   cognitoUser.authenticateUser(authenticationDetails, {
     onSuccess: function (result) {
-      localStorage.setItem('token', JSON.stringify(result.idToken.jwtToken));
+      localStorage.setItem('token', JSON.stringify(result.getIdToken().getJwtToken()));
       localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
       window.location = '/';
     },
     onFailure: function(err) {
       console.log("error authenticating user"+err);
+      $('#signinMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
     },
     newPasswordRequired: function(userAttributes, requiredAttributes) {
-            // User was signed up by an admin and must provide new
-            // password and required attributes, if any, to complete
-            // authentication.
+      // User was signed up by an admin and must provide new
+      // password and required attributes, if any, to complete
+      // authentication.
 
-            // the api doesn't accept this field back
-            delete userAttributes.email_verified;
+      // First time arround, let's display new fields so the user can update his/her password
+      if ($("#signinNewPasswordGroup").is(":hidden"))
+      {
 
-            console.dir(userAttributes);
+        // Displaying new fields
+        $("#signinUsername").prop("disabled", true);
+        $("#signinPassword").prop("disabled", true);
+        $("#signinNewPasswordGroup").show();
+        $("#updatePasswordButton").show();
+        $("#loginButton").hide();
+        $('#signinMessage').append('<div class="alert alert-danger">Your password is epxired, please provide a new one</div>')
+        $('#signinMessage').show();
 
-            $("#Username").prop("disabled", true);
-            $("#Password").prop("disabled", true);
-            $("#signInNewPasswordGroup").show();
-            $("#updatePasswordButton").show();
-            $("#loginButton").hide();
+      }
+      else {
+        userAttributes['name']=$('#signinUsername').val()
 
-            // Get these details and call
-            //cognitoUser.completeNewPasswordChallenge(newPassword, userAttributes, this);
+        // the api doesn't accept this field back
+        delete userAttributes.email_verified;
+
+        // Update user password and login
+        cognitoUser.completeNewPasswordChallenge($('#signinNewPassword').val(), userAttributes, {
+          onSuccess: function(result) {
+            localStorage.setItem('token', JSON.stringify(result.idToken.jwtToken));
+            localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
+            window.location = '/';
+          },
+          onFailure: function(error) {
+            $('#signinMessage').append('<div class="alert alert-danger">'+error.message+'</div>');
+          }
+        });
+      }
     }
   });
 })
@@ -353,6 +379,11 @@ $('#register').submit(function(e){
       {
         Name: 'email',
         Value: email
+      },
+      // TODO - Add email verification process (or is already there with temp password ?)
+      {
+        Name: 'email_verified',
+        Value: 'True'
       }
     ]
   };

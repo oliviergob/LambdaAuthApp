@@ -63,16 +63,17 @@
         <form id="signin">
           <div class="form-group">
             <label>Username</label>
-            <input class="form-control" type="text" id="username" />
+            <input class="form-control" type="text" id="signinUsername" />
           </div>
           <div class="form-group">
             <label>Password</label>
-            <input class="form-control" type="password" id="password" />
+            <input class="form-control" type="password" id="signinPassword" />
           </div>
-          <div class="form-group" id="signInNewPasswordGroup">
+          <div class="form-group" id="signinNewPasswordGroup">
             <label>NewPassword</label>
-            <input class="form-control" type="password" id="signInNewPassword" />
+            <input class="form-control" type="password" id="signinNewPassword" />
           </div>
+          <div class="row" id="signinMessage"></div>
           <button id="loginButton" type="submit" class="btn btn-default">Login</button>
           <button id="updatePasswordButton" type="submit" class="btn btn-default">UpdatePassword</button>
         </form>
@@ -80,7 +81,6 @@
            <a class=".text-center" href="#" onclick="forgotPassword()">Forgot password?</a>
         </div>
         <br>
-        <div class="row" id="signinMessage"></div>
       </div>
     </div>
 
