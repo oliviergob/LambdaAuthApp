@@ -7,17 +7,20 @@ function loadCredentials(callback)
   AWS.config.region = config.region; // Region
   AWSCognito.config.region = config.region;
 
+  // If user is authenticated
   if(localStorage.getItem('token'))
   {
     var logins = {}
     logins['cognito-idp.'+config.region+'.amazonaws.com/'+config.userPoolId] = JSON.parse(localStorage.getItem('token'))
 
+    // Thanks to our ID Token Cognito Federated Identity is providing us
+    // with some AWS credentials that we will use later on for API calls
     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: config.identityPoolId,
         Logins: logins
     });
 
-    // Parsing the identity token to get the username
+    // Parsing the identity token to extract the username
     var token = localStorage.getItem('token');
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace('-', '+').replace('_', '/');
@@ -33,29 +36,34 @@ function loadCredentials(callback)
 
 }
 
-
-var lambda = new AWS.Lambda();
-
-
+// Activate the Nav Panel link the user just clicked on
 $(".nav li").on("click", function() {
     $(".nav li").removeClass("active");
     $(this).addClass("active");
 });
 
+
 $(document).ready(function(){
+  // Always update authentication status when loading the home page
   updateAuthenticationStatus();
   loadBasicData();
-
 });
+
+// Function to log the user out
 function logout(){
+  // Clearing the tokens and other info stored in localstorage
   localStorage.clear();
   window.location = '/';
 };
 
+// This function update toggle the login / logout button depending
+// on the user's authentication status
 function updateAuthenticationStatus(){
   $('#user').empty();
   $('#login').empty();
+  // retreiving the user's ID Token
   var user = localStorage.getItem('token');
+  // If the user is authenticated
   if(user){
     $('#user').show().append('<a href="#" onclick="logout()">Log out ('+username+')</a>');
     $('#login').hide();
@@ -79,9 +87,16 @@ function loadBasicData(){
   // Clearing previous messages
   $('#basicData').empty();
 
+  // If the user is authenticated (no need to call the API autherwise)
   if(localStorage.getItem('token')){
 
+    // Initialising AWS Lambda client
+    var lambda = new AWS.Lambda();
+
+
     var event={key:"randomKey"};
+    // Invoking the lambda function using the AWS credentials already set
+    // by the loadCredentials() function
     lambda.invoke({
         FunctionName: 'basicDataAccess-development',
         Payload: JSON.stringify(event, null, 2) // pass params
@@ -111,13 +126,18 @@ function loadSensitiveData(){
   $('#changePasswordContainer').hide();
   $('#sensitiveDataContainer').show();
 
-
   // Clearing previous messages
   $('#sensitiveData').empty();
 
+  // If the user is authenticated (no need to call the API autherwise)
   if(localStorage.getItem('token')){
 
+    // Initialising AWS Lambda client
+    var lambda = new AWS.Lambda();
+
     var event={key:"randomKey"};
+    // Invoking the lambda function using the AWS credentials already set
+    // by the loadCredentials() function
     lambda.invoke({
         FunctionName: 'adminDataAccess-development',
         Payload: JSON.stringify(event, null, 2) // pass params
@@ -204,6 +224,8 @@ function resetPassword(){
   $("#resetPassword :input").prop("disabled", false);
 
   $('#resetPasswordContainer').show();
+
+
 }
 
 
@@ -225,6 +247,9 @@ function changePassword(){
 
 $('#changePassword').submit(function(e){
 
+  // Emptying previous error messages
+  $('#changePasswordMessage').empty();
+
   // Getting accessToken from local storage
   var accessToken = JSON.parse(localStorage.getItem('accessToken'));
 
@@ -235,9 +260,63 @@ $('#changePassword').submit(function(e){
   };
   var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
   cognitoidentityserviceprovider.changePassword(params, function(err, data) {
-    if (err) console.log(err, err.stack); // an error occurred
-    else     console.log(data);           // successful response
+    if (err)
+    {
+      $('#changePasswordMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
+    }
+    else
+    {
+      $('#changePasswordMessage').append('<div class="alert alert-success">Password succesfully updated \
+                                         <br> \
+                                         you will be redirected to the login page shortly</div>');
+      // Redirecting the user to login page after 3 seconds
+      window.setTimeout(function () {
+          // Clearing the tokens and other info stored in localstorage
+          localStorage.clear();
+          login();
+         },
+       3000);
+    }
   });
+
+});
+
+$('#resetPassword').submit(function(e){
+
+  // Emptying previous error messages
+  $('#resetPasswordMessage').empty();
+
+
+  // Building the userPool object
+  var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool({
+    UserPoolId : config.userPoolId,
+    ClientId : config.userPoolClientId
+  });
+
+  // Building the cognitoUser object
+  var userData = {
+      Username : localStorage.getItem('userName'),
+      Pool : userPool
+  };
+
+  var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
+
+  // Confirming the user's new password using the security code the user received by mail
+  cognitoUser.confirmPassword($('#resetSecurityCode').val(), $('#resetNewPassword').val(), {
+        onSuccess: function (result) {
+            $('#resetPasswordMessage').append('<div class="alert alert-success">Password succesfully updated \
+                                               <br> \
+                                               you will be redirected to the login page shortly</div>');
+            // Redirecting the user to login page after 3 seconds
+            window.setTimeout(function () {
+                 login();
+            }, 3000);
+        },
+        // If an error occured let's display the error message
+        onFailure: function(err) {
+            $('#resetPasswordMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
+        },
+    });
 
 });
 
@@ -255,17 +334,20 @@ $('#forgotPassword').submit(function(e){
   });
 
   var userData = {
-      Username : $('#username').val(),
+      Username : $('#fpUserName').val(),
       Pool : userPool
   };
 
   var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
+  // Let's store the username for later use
+  localStorage.setItem('userName', $('#fpUserName').val());
+
+  // Requesting Cognito User Pool to initiate the reset password for this user
   cognitoUser.forgotPassword({
         onSuccess: function (result) {
-            console.log('call result: ' + result);
-            console.dir(result);
             resetPassword();
         },
+        // If an error occured let's display the error message
         onFailure: function(err) {
             $('#forgotPasswordMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
         },
@@ -299,10 +381,12 @@ $('#signin').submit(function(e){
 
   cognitoUser.authenticateUser(authenticationDetails, {
     onSuccess: function (result) {
+      // Let's store the Id and Access tokens for later use
       localStorage.setItem('token', JSON.stringify(result.getIdToken().getJwtToken()));
       localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
       window.location = '/';
     },
+    // If an error occured let's display the error message
     onFailure: function(err) {
       console.log("error authenticating user"+err);
       $('#signinMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
@@ -326,19 +410,32 @@ $('#signin').submit(function(e){
         $('#signinMessage').show();
 
       }
+      // The user entered a new password
+      // Let's update it in Cognito User Pool
       else {
         userAttributes['name']=$('#signinUsername').val()
 
         // the api doesn't accept this field back
         delete userAttributes.email_verified;
 
-        // Update user password and login
+        // Update user password and log the user in
         cognitoUser.completeNewPasswordChallenge($('#signinNewPassword').val(), userAttributes, {
           onSuccess: function(result) {
+            //
             localStorage.setItem('token', JSON.stringify(result.idToken.jwtToken));
             localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
-            window.location = '/';
+
+            $('#signinMessage').append('<div class="alert alert-success">Password succesfully updated \
+                                               <br> \
+                                               you will be redirected to the home page shortly</div>');
+
+            // Redirecting the user to the home page after 3 seconds
+             window.setTimeout(function () {
+                  window.location = '/';
+             }, 3000);
+
           },
+          // If an error occured let's display the error message
           onFailure: function(error) {
             $('#signinMessage').append('<div class="alert alert-danger">'+error.message+'</div>');
           }
@@ -359,28 +456,19 @@ $('#register').submit(function(e){
     ClientId : config.userPoolClientId
   });
 
-  var username = document.forms['register'].elements["username"].value;
-  var password = document.forms['register'].elements["password"].value;
-  var email = document.forms['register'].elements["email"].value;
 
-  var attributeList = [];
-
-  var dataEmail = {
-      Name : 'email',
-      Value : email
-  };
   var params = {
     UserPoolId: config.userPoolId,
-    Username: username,
+    Username: $('#username').val(),
     DesiredDeliveryMediums: ['EMAIL' ],
     ForceAliasCreation: false,
-    TemporaryPassword: password,
+    TemporaryPassword: generatePassword(),
     UserAttributes: [
       {
         Name: 'email',
-        Value: email
+        Value: $('#email').val(),
       },
-      // TODO - Add email verification process (or is already there with temp password ?)
+      // Users are created by admin so no need to verify email
       {
         Name: 'email_verified',
         Value: 'True'
@@ -390,11 +478,11 @@ $('#register').submit(function(e){
   cognitoidentityserviceprovider.adminCreateUser(params, function(err, data) {
     if (err)
     {
-      $('#registerMessage').append('<div class="alert alert-danger">Error while creating the user</div>')
+      $('#registerMessage').append('<div class="alert alert-danger">Error while creating the user</div>');
     }
     else
     {
-        $('#registerMessage').append('<div class="alert alert-success">User successfuly created</div>')
+        $('#registerMessage').append('<div class="alert alert-success">User successfuly created</div>');
         $("#register :input").prop("disabled", true);
     }
   });
@@ -402,3 +490,55 @@ $('#register').submit(function(e){
 
 
 })
+
+
+// Function to generate a 10 to 13 character long password
+// with at least one of the following:
+//   - Lowercase character
+//   - Uppercase character
+//   - Special character
+//   - Number
+function generatePassword () {
+  var specials = '!@#$%^&*()_+{}:"<>?\|[];\',./`~';
+  var lowercase = 'abcdefghijklmnopqrstuvwxyz';
+  var uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var numbers = '0123456789';
+
+  var all = specials + lowercase + uppercase + numbers;
+
+  String.prototype.pick = function(min, max) {
+      var n, chars = '';
+
+      if (typeof max === 'undefined') {
+          n = min;
+      } else {
+          n = min + Math.floor(Math.random() * (max - min));
+      }
+
+      for (var i = 0; i < n; i++) {
+          chars += this.charAt(Math.floor(Math.random() * this.length));
+      }
+
+      return chars;
+  };
+
+
+  // Credit to @Christoph: http://stackoverflow.com/a/962890/464744
+  String.prototype.shuffle = function() {
+      var array = this.split('');
+      var tmp, current, top = array.length;
+
+      if (top) while (--top) {
+          current = Math.floor(Math.random() * (top + 1));
+          tmp = array[current];
+          array[current] = array[top];
+          array[top] = tmp;
+      }
+
+      return array.join('');
+    };
+
+    var password = (specials.pick(1) + lowercase.pick(1) + uppercase.pick(1) + all.pick(10, 13)).shuffle();
+
+    return(password);
+}

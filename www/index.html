@@ -78,7 +78,8 @@
           <button id="updatePasswordButton" type="submit" class="btn btn-default">UpdatePassword</button>
         </form>
         <div class="span12" style="text-align:center">
-           <a class=".text-center" href="#" onclick="forgotPassword()">Forgot password?</a>
+           <br>
+           <a class=".text-center" href="#" onclick="forgotPassword()">Forgot password&#63;</a>
         </div>
         <br>
       </div>
@@ -90,7 +91,7 @@
         <form id="forgotPassword">
           <div class="form-group">
             <label>Username</label>
-            <input class="form-control" type="text" id="userName" />
+            <input class="form-control" type="text" id="fpUserName" />
           </div>
           <button type="submit" class="btn btn-default">Reset Password</button>
         </form>
@@ -105,11 +106,11 @@
         <form id="resetPassword">
           <div class="form-group">
             <label>New Password</label>
-            <input class="form-control" type="password" id="password" />
+            <input class="form-control" type="password" id="resetNewPassword" />
           </div>
           <div class="form-group">
             <label>Security Code</label>
-            <input class="form-control" type="password" id="password" />
+            <input class="form-control" type="password" id="resetSecurityCode" />
           </div>
           <button type="submit" class="btn btn-default">Change Password</button>
         </form>
@@ -144,10 +145,6 @@
           <div class="form-group">
             <label>Username</label>
             <input class="form-control" type="text" id="username" />
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input class="form-control" type="password" id="password" />
           </div>
           <div class="form-group">
             <label>email</label>
