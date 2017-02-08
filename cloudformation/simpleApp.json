@@ -28,6 +28,55 @@
                  }
              }
           },
+          "S3BucketLambda" : {
+             "Type" : "AWS::S3::Bucket",
+             "Properties" : {
+                 "BucketName" : { "Fn::Join" : [ "", [ { "Ref" : "BucketNameParam" }, ".lambda" ] ] }
+             }
+          },
+          "lambdaExecutionBasicRole": {
+             "Type": "AWS::IAM::Role",
+             "Properties": {
+               "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": "lambda.amazonaws.com"
+                      },
+                      "Action": "sts:AssumeRole"
+                    }
+                  ]
+               },
+               "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"],
+               "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "LambdaExecutionRole" ] ] },
+             }
+          },
+          "basicDataAccess": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Handler": "index.handler",
+              "FunctionName": "basicDataAccess",
+              "Role": { "Fn::GetAtt" : ["lambdaExecutionBasicRole", "Arn"] },
+              "Code": {"ZipFile": "return 0;" },
+              "Runtime": "nodejs4.3",
+              "Timeout": "20",
+              "MemorySize": "128",
+            }
+          },
+          "adminDataAccess": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Handler": "index.handler",
+              "FunctionName": "adminDataAccess",
+              "Role": { "Fn::GetAtt" : ["lambdaExecutionBasicRole", "Arn"] },
+              "Code": {"ZipFile": "return 0;" },
+              "Runtime": "nodejs4.3",
+              "Timeout": "20",
+              "MemorySize": "128",
+            }
+          },
           "SimpleAuthAppBasicUserRole": {
              "Type": "AWS::IAM::Role",
              "Properties": {
@@ -86,7 +135,7 @@
                               "lambda:InvokeFunction"
                           ],
                           "Resource": [
-                              "arn:aws:lambda:us-east-1:546190104433:function:basicDataAccess-development"
+                            { "Fn::GetAtt" : ["basicDataAccess", "Arn"] }
                           ]
                       }
                   ]
@@ -106,7 +155,7 @@
                               "lambda:InvokeFunction"
                           ],
                           "Resource": [
-                              "arn:aws:lambda:us-east-1:546190104433:function:adminDataAccess-development"
+                              { "Fn::GetAtt" : ["adminDataAccess", "Arn"] }
                           ]
                       }
                   ]

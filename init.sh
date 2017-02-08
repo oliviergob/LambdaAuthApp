@@ -77,9 +77,13 @@ sed  -e "s/IDPOOL/$identityPoolId/g" templates/config.js.template | \
 # Create S3 Bucket
 echo
 echo Creating cloudformation stack $appName in $region to create:
-echo "   - S3 bucket $bucketName"
+echo "   - S3 bucket $bucketName for static website hosting"
+echo "   - S3 bucket $bucketName.lambda for deploying lambda fuction code"
+echo "   - IAM Role SimpleAuthAppLambdaExecutionRole"
 echo "   - IAM Role SimpleAuthAppAdminRole"
 echo "   - IAM Role SimpleAuthAppBasicUserRole"
+echo "   - Lambda Function basicDataAccess"
+echo "   - Lambda Function adminDataAccess"
 #TODO Add role names as stack parameters
 aws cloudformation create-stack \
     --capabilities CAPABILITY_NAMED_IAM \
