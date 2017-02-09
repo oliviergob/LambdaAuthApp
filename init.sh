@@ -25,7 +25,6 @@ appName=$(jq -r '.appName' config.json)
 appNameLowerCase=$(echo "$appName" | tr '[:upper:]' '[:lower:]')
 bucketName=$appNameLowerCase.$(jq -r '.bucket' config.json)
 adminEmail=$(jq -r '.adminEmail' config.json)
-adminTempPassword=$(jq -r '.adminTempPassword' config.json)
 
 # Getting the account number for later user
 awsAccountNumber=`aws sts get-caller-identity --output text --query 'Account'`
@@ -74,11 +73,10 @@ sed  -e "s/IDPOOL/$identityPoolId/g" templates/config.js.template | \
      sed  -e "s/USERPOOLCLIENT/$userPoolClientId/g" | \
      sed  -e "s/AWSREGION/$region/g" > www/js/config.js
 
-# Create S3 Bucket
+# Create the cloudformation stack
 echo
 echo Creating cloudformation stack $appName in $region to create:
 echo "   - S3 bucket $bucketName for static website hosting"
-echo "   - S3 bucket $bucketName.lambda for deploying lambda fuction code"
 echo "   - IAM Role SimpleAuthAppLambdaExecutionRole"
 echo "   - IAM Role SimpleAuthAppAdminRole"
 echo "   - IAM Role SimpleAuthAppBasicUserRole"
@@ -131,8 +129,7 @@ echo Creating Admin user
 aws cognito-idp admin-create-user \
     --user-pool-id $userPoolId \
     --username admin \
-    --temporary-password $adminTempPassword \
-    --user-attributes Name=email,Value=$adminEmail > /dev/null
+    --user-attributes Name=email,Value=$adminEmail  Name=email_verified,Value=True > /dev/null
 
 aws cognito-idp admin-add-user-to-group \
      --user-pool-id $userPoolId \

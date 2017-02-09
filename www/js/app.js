@@ -98,7 +98,7 @@ function loadBasicData(){
     // Invoking the lambda function using the AWS credentials already set
     // by the loadCredentials() function
     lambda.invoke({
-        FunctionName: 'basicDataAccess-development',
+        FunctionName: 'basicDataAccess',
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
@@ -139,7 +139,7 @@ function loadSensitiveData(){
     // Invoking the lambda function using the AWS credentials already set
     // by the loadCredentials() function
     lambda.invoke({
-        FunctionName: 'adminDataAccess-development',
+        FunctionName: 'adminDataAccess',
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {

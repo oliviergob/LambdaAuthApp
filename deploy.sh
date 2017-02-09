@@ -25,8 +25,9 @@ appName=$(jq -r '.appName' config.json)
 appNameLowerCase=$(echo "$appName" | tr '[:upper:]' '[:lower:]')
 bucketName=$appNameLowerCase.$(jq -r '.bucket' config.json)
 
-
 echo "Sync www content with S3 bucket $bucketName begin..."
+# copying to a build directory to append the config.js into app.js
+# This is to remove the number of S3 GET request
 rm -rf build 2>/dev/null
 cp -r www build
 cd build/js
@@ -39,11 +40,20 @@ echo "Sync www content with S3 bucket $bucketName end"
 
 cd functions
 
+echo
 # Updating Lambda Functions
 for f in $(ls -1); do
-  echo "Updating function $f begin..."
+  echo "Deploying code for function $f begin..."
   cd $f
-  node-lambda -f deploy.env deploy
+  # Zipping the source files
+  rm -rf build 2>/dev/null
+  mkdir build 2>/dev/null
+  zip build/$f.zip index.js package.json
+  #Updating the function code
+  aws lambda update-function-code \
+    --region $region \
+    --function-name $f \
+    --zip-file fileb://./build/$f.zip
   cd ..
   echo "Updating function $f end"
 done

@@ -28,12 +28,6 @@
                  }
              }
           },
-          "S3BucketLambda" : {
-             "Type" : "AWS::S3::Bucket",
-             "Properties" : {
-                 "BucketName" : { "Fn::Join" : [ "", [ { "Ref" : "BucketNameParam" }, ".lambda" ] ] }
-             }
-          },
           "lambdaExecutionBasicRole": {
              "Type": "AWS::IAM::Role",
              "Properties": {
