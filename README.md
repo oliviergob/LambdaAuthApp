@@ -19,9 +19,11 @@ There are two types of users:
 * Basic users can:
   * View Basic Data
   * Reset their password
-* Admin users can:
-  * Create other users
+* Admin users can also:
   * View Sensitive Data
+  * Create other users
+  
+The top menus are always on, this is by design, the goal of this app is to prove the authentication / groups mechanism provided by Cognito + Iam Roles.
 
 
 Demo
