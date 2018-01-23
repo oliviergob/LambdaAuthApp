@@ -15,6 +15,7 @@ It is using the following AWS technologies:
 ![Architecture Diagramm](https://s3.amazonaws.com/simpleauthapp.og-simple-app-bucket/img/serverless-simple-auth-app.png)
 
 There are two types of users:
+
 * Basic users can:
  * View Basic Data
  * Reset their password
