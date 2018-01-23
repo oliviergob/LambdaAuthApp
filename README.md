@@ -34,6 +34,5 @@ Credentials:
 
 Feel free to create yourself a user!
 
-*Note: The top menus are always on, regardless of which type of user is logged in. This is by design, the goal of this app is to prove the authentication / groups mechanism provided by Cognito and Iam Roles.
-A basic user can attempt to call the adminDataAccess but will not succeed* 
+**Note: The top menus are always on, regardless of which type of user is logged in. This is by design, the goal of this app is to prove the authentication / groups mechanism provided by Cognito and Iam Roles works and integrates with Lambda functions. A basic user can attempt to call the adminDataAccess but will not succeed**
 
