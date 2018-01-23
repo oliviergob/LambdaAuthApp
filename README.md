@@ -17,14 +17,13 @@ It is using the following AWS technologies:
 There are two types of users:
 
 * Basic users can:
-  * View Basic Data
+  * Authenticate
+  * View Basic Data (by calling basicDataAccess Lambda function)
   * Reset their password
 * Admin users can also:
-  * View Sensitive Data
+  * View Sensitive Data (by calling adminDataAccess Lambda function)
   * Create other users
   
-The top menus are always on, this is by design, the goal of this app is to prove the authentication / groups mechanism provided by Cognito + Iam Roles.
-
 
 Demo
 -------------
@@ -34,3 +33,7 @@ Credentials:
 * eiNH22bc.adm
 
 Feel free to create yourself a user!
+
+*Note: The top menus are always on, regardless of which type of user is logged in. This is by design, the goal of this app is to prove the authentication / groups mechanism provided by Cognito and Iam Roles.
+A basic user can attempt to call the adminDataAccess but will not succeed* 
+
