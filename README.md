@@ -15,14 +15,13 @@ It is using the following AWS technologies:
 ![Architecture Diagramm](https://s3.amazonaws.com/simpleauthapp.og-simple-app-bucket/img/serverless-simple-auth-app.png)
 
 There are two types of users:
-
 * Basic users can:
-** View Basic Data
-** Reset their password
-
+ * View Basic Data
+ * Reset their password
 * Admin users can:
-** Create other users
-** View Sensitive Data
+ * Create other users
+ * View Sensitive Data
+
 
 Demo
 -------------
