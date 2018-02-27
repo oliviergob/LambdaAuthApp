@@ -3,7 +3,7 @@ var config = {
   "userPoolId": "",
   "userPoolClientId": "",
   "region": ""
-}
+};
 
 var AWS;
 var AWSCognito;
@@ -157,7 +157,7 @@ function loadSensitiveData(){
         }
         else {
           data=JSON.parse(data.Payload);
-          if(data.httpStatus == 200){
+          if(data.httpStatus === 200){
             $("#sensitiveData").append("<div class=\"alert alert-success\">"+ data.value +"</div>");
           } else {
             $("#sensitiveData").append("<div class=\"alert alert-danger\">"+ data.message +"</div>");
@@ -336,7 +336,7 @@ $("#forgotPassword").submit(function(e){
   $("#forgotPasswordMessage").empty();
 
   // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
-  AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'});
+  AWSCognito.config.update({accessKeyId: "anything", secretAccessKey: "anything"});
 
   var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool({
     UserPoolId : config.userPoolId,
@@ -441,7 +441,7 @@ $("#signin").submit(function(e){
 
             // Redirecting the user to the home page after 3 seconds
              window.setTimeout(function () {
-                  window.location = '/';
+                  window.location = "/";
              }, 3000);
 
           },
@@ -553,4 +553,4 @@ $("#register").submit(function(e){
 
 
 
-})
+});
