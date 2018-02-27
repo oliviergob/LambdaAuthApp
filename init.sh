@@ -27,7 +27,7 @@ bucketName=$appNameLowerCase.$(jq -r '.bucket' config.json)
 adminEmail=$(jq -r '.adminEmail' config.json)
 
 # Getting the account number for later user
-awsAccountNumber=`aws sts get-caller-identity --output text --query 'Account'`
+awsAccountNumber=$(aws sts get-caller-identity --output text --query 'Account')
 
 
 # Verifying the bucket name is Valid
@@ -46,11 +46,11 @@ scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 scriptDir="file://${scriptDir//////}//cloudformation//simpleApp.json"
 
 echo Creating Cognito User pool
-userPoolId=`aws cognito-idp create-user-pool \
+userPoolId=$(aws cognito-idp create-user-pool \
                 --pool-name ${appName}UserPool \
                 --auto-verified-attributes email \
                 --admin-create-user-config AllowAdminCreateUserOnly=true \
-                --schema  '[{"Name":"name","Required":true}, {"Name":"email","Required":true}]' | jq -r '.UserPool.Id'`
+                --schema  '[{"Name":"name","Required":true}, {"Name":"email","Required":true}]' | jq -r '.UserPool.Id')
 userPoolArn="arn:aws:cognito-idp:$region:$awsAccountNumber:userpool/$userPoolId"
 userPoolClientId=$(aws cognito-idp create-user-pool-client \
                        --user-pool-id $userPoolId \
@@ -59,10 +59,10 @@ echo "Created User Pool ${appName}UserPool with ARN $userPoolArn and client ID $
 
 echo
 echo Creating Cognito Identity Pool
-identityPoolId=`aws cognito-identity create-identity-pool \
+identityPoolId=$(aws cognito-identity create-identity-pool \
                     --identity-pool-name ${appName}IdPool \
                     --no-allow-unauthenticated-identities \
-                    --cognito-identity-providers ProviderName=cognito-idp.$region.amazonaws.com/$userPoolId,ClientId=$userPoolClientId | jq -r '.IdentityPoolId'`
+                    --cognito-identity-providers ProviderName=cognito-idp.$region.amazonaws.com/$userPoolId,ClientId=$userPoolClientId | jq -r '.IdentityPoolId')
 echo "Created Identity Pool Id ${appName}IdPool with ID $identityPoolId"
 
 echo

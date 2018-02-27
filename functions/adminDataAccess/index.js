@@ -1,4 +1,4 @@
-console.log('Loading function');
+console.log("Loading function");
 
 exports.handler = (event, context, callback) => {
 	var key = event.key;
@@ -24,7 +24,7 @@ exports.handler = (event, context, callback) => {
 					httpStatus : 500,
 					requestId : context.awsRequestId,
 					message : errorMessage
-			}
+			};
 			callback(myErrorObj);
 			return;
 		}

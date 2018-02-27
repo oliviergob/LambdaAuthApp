@@ -1,3 +1,6 @@
+var AWS;
+var AWSCognito;
+
 var username;
 loadCredentials();
 
@@ -44,32 +47,26 @@ $(".nav li").on("click", function() {
 // This function update toggle the login / logout button depending
 // on the user's authentication status
 function updateAuthenticationStatus(){
-  $('#user').empty();
-  $('#login').empty();
+  $("#user").empty();
+  $("#login").empty();
   // retreiving the user's ID Token
   var user = localStorage.getItem("token");
   // If the user is authenticated
   if(user){
-    $('#user').show().append('<a href="#" onclick="logout()">Log out ('+username+')</a>');
-    $('#login').hide();
+    $("#user").show().append('<a href="#" onclick="logout()">Log out ('+username+')</a>');
+    $("#login").hide();
   } else {
-    $('#login').show().append('<a href="#"onclick="login()">Log in</a>');
-    $('#user').hide();
+    $("#login").show().append('<a href="#"onclick="login()">Log in</a>');
+    $("#user").hide();
   }
 }
 
-
-$(document).ready(function(){
-  // Always update authentication status when loading the home page
-  updateAuthenticationStatus();
-  loadBasicData();
-});
 
 // Function to log the user out
 function logout(){
   // Clearing the tokens and other info stored in localstorage
   localStorage.clear();
-  window.location = '/';
+  window.location = "/";
 };
 
 
@@ -98,7 +95,7 @@ function loadBasicData(){
     // Invoking the lambda function using the AWS credentials already set
     // by the loadCredentials() function
     lambda.invoke({
-        FunctionName: 'basicDataAccess',
+        FunctionName: "basicDataAccess",
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
@@ -116,6 +113,11 @@ function loadBasicData(){
   }
 }
 
+$(document).ready(function(){
+  // Always update authentication status when loading the home page
+  updateAuthenticationStatus();
+  loadBasicData();
+});
 
 function loadSensitiveData(){
   $("#basicDataContainer").hide();
@@ -127,7 +129,7 @@ function loadSensitiveData(){
   $("#sensitiveDataContainer").show();
 
   // Clearing previous messages
-  $('#sensitiveData').empty();
+  $("#sensitiveData").empty();
 
   // If the user is authenticated (no need to call the API autherwise)
   if(localStorage.getItem("token")){
@@ -143,14 +145,14 @@ function loadSensitiveData(){
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
-          $('#sensitiveData').append('<div class="alert alert-danger">Error retreiving data</div>');
+          $("#sensitiveData").append('<div class="alert alert-danger">Error retreiving data</div>');
         }
         else {
           data=JSON.parse(data.Payload);
           if(data.httpStatus == 200){
-            $('#sensitiveData').append('<div class="alert alert-success">'+ data.value +'</div>');
+            $("#sensitiveData").append('<div class="alert alert-success">'+ data.value +'</div>');
           } else {
-            $('#sensitiveData').append('<div class="alert alert-danger">'+ data.message +'</div>');
+            $("#sensitiveData").append('<div class="alert alert-danger">'+ data.message +'</div>');
           }
         }
       });
@@ -184,7 +186,7 @@ function regsiterUser(){
   $("#forgotPasswordContainer").hide();
   $("#changePasswordContainer").hide();
 
-  $('#registerMessage').empty();
+  $("#registerMessage").empty();
   $('#register').trigger("reset");
   $("#register :input").prop("disabled", false);
 
@@ -219,8 +221,8 @@ function resetPassword(){
   $("#changePasswordContainer").hide();
   $("#forgotPasswordContainer").hide();
 
-  $('#resetPasswordMessage').empty();
-  $('#resetPassword').trigger("reset");
+  $("#resetPasswordMessage").empty();
+  $("#resetPassword").trigger("reset");
   $("#resetPassword :input").prop("disabled", false);
 
   $("#resetPasswordContainer").show();
@@ -238,35 +240,35 @@ function changePassword(){
   $("#resetPasswordContainer").hide();
   $("#forgotPasswordContainer").hide();
 
-  $('#changePasswordMessage').empty();
-  $('#changePassword').trigger("reset");
+  $("#changePasswordMessage").empty();
+  $("#changePassword").trigger("reset");
   $("#changePassword :input").prop("disabled", false);
 
   $("#changePasswordContainer").show();
 }
 
-$('#changePassword').submit(function(e){
+$("#changePassword").submit(function(e){
 
   // Emptying previous error messages
-  $('#changePasswordMessage').empty();
+  $("#changePasswordMessage").empty();
 
   // Getting accessToken from local storage
-  var accessToken = JSON.parse(localStorage.getItem('accessToken'));
+  var accessToken = JSON.parse(localStorage.getItem("accessToken"));
 
   var params = {
-    PreviousPassword: $('#oldPassword').val(),
-    ProposedPassword: $('#newPassword').val(),
+    PreviousPassword: $("#oldPassword").val(),
+    ProposedPassword: $("#newPassword").val(),
     AccessToken: accessToken
   };
   var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
   cognitoidentityserviceprovider.changePassword(params, function(err, data) {
     if (err)
     {
-      $('#changePasswordMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
+      $("#changePasswordMessage").append('<div class="alert alert-danger">'+err.message+'</div>');
     }
     else
     {
-      $('#changePasswordMessage').append('<div class="alert alert-success">Password succesfully updated \
+      $("#changePasswordMessage").append('<div class="alert alert-success">Password succesfully updated \
                                          <br> \
                                          you will be redirected to the login page shortly</div>');
       // Redirecting the user to login page after 3 seconds
@@ -281,10 +283,10 @@ $('#changePassword').submit(function(e){
 
 });
 
-$('#resetPassword').submit(function(e){
+$("#resetPassword").submit(function(e){
 
   // Emptying previous error messages
-  $('#resetPasswordMessage').empty();
+  $("#resetPasswordMessage").empty();
 
 
   // Building the userPool object
@@ -295,16 +297,16 @@ $('#resetPassword').submit(function(e){
 
   // Building the cognitoUser object
   var userData = {
-      Username : localStorage.getItem('userName'),
+      Username : localStorage.getItem("userName"),
       Pool : userPool
   };
 
   var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
 
   // Confirming the user's new password using the security code the user received by mail
-  cognitoUser.confirmPassword($('#resetSecurityCode').val(), $('#resetNewPassword').val(), {
+  cognitoUser.confirmPassword($("#resetSecurityCode").val(), $("#resetNewPassword").val(), {
         onSuccess: function (result) {
-            $('#resetPasswordMessage').append('<div class="alert alert-success">Password succesfully updated \
+            $("#resetPasswordMessage").append('<div class="alert alert-success">Password succesfully updated \
                                                <br> \
                                                you will be redirected to the login page shortly</div>');
             // Redirecting the user to login page after 3 seconds
@@ -314,7 +316,7 @@ $('#resetPassword').submit(function(e){
         },
         // If an error occured let's display the error message
         onFailure: function(err) {
-            $('#resetPasswordMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
+            $("#resetPasswordMessage").append('<div class="alert alert-danger">'+err.message+'</div>');
         },
     });
 
@@ -334,13 +336,13 @@ $('#forgotPassword').submit(function(e){
   });
 
   var userData = {
-      Username : $('#fpUserName').val(),
+      Username : $("#fpUserName").val(),
       Pool : userPool
   };
 
   var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
   // Let's store the username for later use
-  localStorage.setItem('userName', $('#fpUserName').val());
+  localStorage.setItem("userName", $("#fpUserName").val());
 
   // Requesting Cognito User Pool to initiate the reset password for this user
   cognitoUser.forgotPassword({
@@ -349,17 +351,17 @@ $('#forgotPassword').submit(function(e){
         },
         // If an error occured let's display the error message
         onFailure: function(err) {
-            $('#forgotPasswordMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
+            $("#forgotPasswordMessage").append('<div class="alert alert-danger">'+err.message+'</div>');
         },
     });
 });
 
 
 
-$('#signin').submit(function(e){
+$("#signin").submit(function(e){
   e.preventDefault();
   // Emptying previous error messages
-  $('#signinMessage').empty();
+  $("#signinMessage").empty();
   // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
   AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'});
 
@@ -383,7 +385,7 @@ $('#signin').submit(function(e){
     onSuccess: function (result) {
       // Let's store the Id and Access tokens for later use
       localStorage.setItem("token", JSON.stringify(result.getIdToken().getJwtToken()));
-      localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
+      localStorage.setItem("accessToken", JSON.stringify(result.getAccessToken().getJwtToken()));
       window.location = '/';
     },
     // If an error occured let's display the error message
@@ -423,7 +425,7 @@ $('#signin').submit(function(e){
           onSuccess: function(result) {
             //
             localStorage.setItem("token", JSON.stringify(result.idToken.jwtToken));
-            localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
+            localStorage.setItem("accessToken", JSON.stringify(result.getAccessToken().getJwtToken()));
 
             $('#signinMessage').append('<div class="alert alert-success">Password succesfully updated \
                                                <br> \
@@ -447,7 +449,7 @@ $('#signin').submit(function(e){
 
 
 $('#register').submit(function(e){
-  $('#registerMessage').empty();
+  $("#registerMessage").empty();
   e.preventDefault();
   var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
 
@@ -478,11 +480,11 @@ $('#register').submit(function(e){
   cognitoidentityserviceprovider.adminCreateUser(params, function(err, data) {
     if (err)
     {
-      $('#registerMessage').append('<div class="alert alert-danger">Error while creating the user</div>');
+      $("#registerMessage").append('<div class="alert alert-danger">Error while creating the user</div>');
     }
     else
     {
-        $('#registerMessage').append('<div class="alert alert-success">User successfuly created</div>');
+        $("#registerMessage").append('<div class="alert alert-success">User successfuly created</div>');
         $("#register :input").prop("disabled", true);
     }
   });

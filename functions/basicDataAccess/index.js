@@ -1,19 +1,8 @@
-console.log('Loading function');
+console.log("Loading function");
 
 exports.handler = (event, context, callback) => {
 	var key = event.key;
 
-
-	validateMandatoryParam(key, 'key', callback);
-
-	var data = {
-			httpStatus : 200,
-      type: "Basic User Data",
-      value: "Some not very important data"
-    };
-
-
-	callback(null, data);
 
 	function validateMandatoryParam(varToValidate, varName, callback)
 	{
@@ -26,10 +15,21 @@ exports.handler = (event, context, callback) => {
 					httpStatus : 500,
 					requestId : context.awsRequestId,
 					message : errorMessage
-			}
+			};
 			callback(null,myErrorObj);
 			return;
 		}
 	}
+
+	validateMandatoryParam(key, 'key', callback);
+
+	var data = {
+			httpStatus : 200,
+      type: "Basic User Data",
+      value: "Some not very important data"
+    };
+
+
+	callback(null, data);
 
 }
