@@ -1,3 +1,10 @@
+var config = {
+  "identityPoolId": "",
+  "userPoolId": "",
+  "userPoolClientId": "",
+  "region": ""
+}
+
 var AWS;
 var AWSCognito;
 
@@ -11,7 +18,7 @@ function loadCredentials(callback)
   // If user is authenticated
   if(localStorage.getItem("token"))
   {
-    var logins = {}
+    var logins = {};
     logins["cognito-idp."+config.region+".amazonaws.com/"+config.userPoolId] = JSON.parse(localStorage.getItem("token"));
 
     // Thanks to our ID Token Cognito Federated Identity is providing us
@@ -387,7 +394,7 @@ $("#signin").submit(function(e){
       // Let's store the Id and Access tokens for later use
       localStorage.setItem("token", JSON.stringify(result.getIdToken().getJwtToken()));
       localStorage.setItem("accessToken", JSON.stringify(result.getAccessToken().getJwtToken()));
-      window.location = '/';
+      window.location = "/";
     },
     // If an error occured let's display the error message
     onFailure: function(err) {
@@ -446,7 +453,7 @@ $("#signin").submit(function(e){
       }
     }
   });
-})
+});
 
 // Function to generate a 10 to 13 character long password
 // with at least one of the following:
@@ -463,7 +470,7 @@ function generatePassword () {
   var all = specials + lowercase + uppercase + numbers;
 
   String.prototype.pick = function(min, max) {
-      var n, chars = '';
+      var n, chars = "";
 
       if (typeof max === "undefined") {
           n = min;
@@ -481,17 +488,20 @@ function generatePassword () {
 
   // Credit to @Christoph: http://stackoverflow.com/a/962890/464744
   String.prototype.shuffle = function() {
-      var array = this.split('');
+      var array = this.split("");
       var tmp, current, top = array.length;
 
-      if (top) while (--top) {
+      if (top)
+      {
+        while (--top) {
           current = Math.floor(Math.random() * (top + 1));
           tmp = array[current];
           array[current] = array[top];
           array[top] = tmp;
+        }
       }
 
-      return array.join('');
+      return array.join("");
     };
 
     var password = (specials.pick(1) + lowercase.pick(1) + uppercase.pick(1) + all.pick(10, 13)).shuffle();

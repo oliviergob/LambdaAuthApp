@@ -31,6 +31,7 @@ echo "Sync www content with S3 bucket $bucketName begin..."
 rm -rf build 2>/dev/null
 cp -r www build
 cd build/js
+sed -i '1,6d' app.js
 cat config.js app.js > app.js.tmp && mv app.js.tmp app.js
 rm config.js
 cd ..
