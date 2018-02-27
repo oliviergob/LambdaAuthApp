@@ -21,7 +21,7 @@ exports.handler = (event, context, callback) => {
 		}
 	}
 
-	validateMandatoryParam(key, 'key', callback);
+	validateMandatoryParam(key, "key", callback);
 
 	var data = {
 			httpStatus : 200,
@@ -32,4 +32,4 @@ exports.handler = (event, context, callback) => {
 
 	callback(null, data);
 
-}
+};

@@ -107,9 +107,9 @@ fi
 
 echo "Cloudformation Stack now fully created"
 
-stackOutput=`aws cloudformation describe-stacks \
+stackOutput=$(aws cloudformation describe-stacks \
     --stack-name $appName \
-    --region $region | jq -r '.Stacks[0].Outputs[] | .OutputKey +"="+ .OutputValue'`
+    --region $region | jq -r '.Stacks[0].Outputs[] | .OutputKey +"="+ .OutputValue')
 
 eval $stackOutput
 

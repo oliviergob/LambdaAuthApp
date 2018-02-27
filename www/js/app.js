@@ -2,7 +2,6 @@ var AWS;
 var AWSCognito;
 
 var username;
-loadCredentials();
 
 function loadCredentials(callback)
 {
@@ -38,6 +37,8 @@ function loadCredentials(callback)
 
 }
 
+loadCredentials();
+
 // Activate the Nav Panel link the user just clicked on
 $(".nav li").on("click", function() {
     $(".nav li").removeClass("active");
@@ -53,10 +54,10 @@ function updateAuthenticationStatus(){
   var user = localStorage.getItem("token");
   // If the user is authenticated
   if(user){
-    $("#user").show().append('<a href="#" onclick="logout()">Log out ('+username+')</a>');
+    $("#user").show().append("<a href=\"#\" onclick=\"logout()\">Log out ("+username+")</a>");
     $("#login").hide();
   } else {
-    $("#login").show().append('<a href="#"onclick="login()">Log in</a>');
+    $("#login").show().append("<a href=\"#\"onclick=\"login()\">Log in</a>");
     $("#user").hide();
   }
 }
@@ -99,14 +100,14 @@ function loadBasicData(){
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
-          $('#basicData').append('<div class="alert alert-danger">Error retreiving data</div>');
+          $("#basicData").append("<div class=\"alert alert-danger\">Error retreiving data</div>");
         }
         else {
           data=JSON.parse(data.Payload);
           if(data.httpStatus == 200){
-            $('#basicData').append('<div class="alert alert-success">'+ data.value +'</div>');
+            $("#basicData").append("<div class=\"alert alert-success\">"+ data.value +"</div>");
           } else {
-            $('#basicData').append('<div class="alert alert-danger">'+ data.message +'</div>');
+            $("#basicData").append("<div class=\"alert alert-danger\">"+ data.message +"</div>");
           }
         }
       });
@@ -145,14 +146,14 @@ function loadSensitiveData(){
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
-          $("#sensitiveData").append('<div class="alert alert-danger">Error retreiving data</div>');
+          $("#sensitiveData").append("<div class=\"alert alert-danger\">Error retreiving data</div>");
         }
         else {
           data=JSON.parse(data.Payload);
           if(data.httpStatus == 200){
-            $("#sensitiveData").append('<div class="alert alert-success">'+ data.value +'</div>');
+            $("#sensitiveData").append("<div class=\"alert alert-success\">"+ data.value +"</div>");
           } else {
-            $("#sensitiveData").append('<div class="alert alert-danger">'+ data.message +'</div>');
+            $("#sensitiveData").append("<div class=\"alert alert-danger\">"+ data.message +"</div>");
           }
         }
       });
@@ -168,8 +169,8 @@ function login(){
   $("#forgotPasswordContainer").hide();
   $("#changePasswordContainer").hide();
 
-  $('#signinMessage').empty();
-  $('#signin').trigger("reset");
+  $("#signinMessage").empty();
+  $("#signin").trigger("reset");
   $("#signin :input").prop("disabled", false);
   $("#signinNewPasswordGroup").hide();
   $("#updatePasswordButton").hide();
@@ -187,7 +188,7 @@ function regsiterUser(){
   $("#changePasswordContainer").hide();
 
   $("#registerMessage").empty();
-  $('#register').trigger("reset");
+  $("#register").trigger("reset");
   $("#register :input").prop("disabled", false);
 
   $("#registerUserContainer").show();
@@ -203,8 +204,8 @@ function forgotPassword(){
   $("#resetPasswordContainer").hide();
   $("#changePasswordContainer").hide();
 
-  $('#forgotPasswordMessage').empty();
-  $('#forgotPassword').trigger("reset");
+  $("#forgotPasswordMessage").empty();
+  $("#forgotPassword").trigger("reset");
   $("#forgotPassword :input").prop("disabled", false);
 
   $("#forgotPasswordContainer").show();
@@ -264,13 +265,13 @@ $("#changePassword").submit(function(e){
   cognitoidentityserviceprovider.changePassword(params, function(err, data) {
     if (err)
     {
-      $("#changePasswordMessage").append('<div class="alert alert-danger">'+err.message+'</div>');
+      $("#changePasswordMessage").append("<div class=\"alert alert-danger\">"+err.message+"</div>");
     }
     else
     {
-      $("#changePasswordMessage").append('<div class="alert alert-success">Password succesfully updated \
-                                         <br> \
-                                         you will be redirected to the login page shortly</div>');
+      $("#changePasswordMessage").append("<div class=\"alert alert-success\">Password succesfully updated \n"+
+                                         "<br> \n"+
+                                         "you will be redirected to the login page shortly</div>");
       // Redirecting the user to login page after 3 seconds
       window.setTimeout(function () {
           // Clearing the tokens and other info stored in localstorage
@@ -306,9 +307,9 @@ $("#resetPassword").submit(function(e){
   // Confirming the user's new password using the security code the user received by mail
   cognitoUser.confirmPassword($("#resetSecurityCode").val(), $("#resetNewPassword").val(), {
         onSuccess: function (result) {
-            $("#resetPasswordMessage").append('<div class="alert alert-success">Password succesfully updated \
-                                               <br> \
-                                               you will be redirected to the login page shortly</div>');
+            $("#resetPasswordMessage").append("<div class=\"alert alert-success\">Password succesfully updated \n"+
+                                               "<br> \n"+
+                                               "you will be redirected to the login page shortly</div>");
             // Redirecting the user to login page after 3 seconds
             window.setTimeout(function () {
                  login();
@@ -316,16 +317,16 @@ $("#resetPassword").submit(function(e){
         },
         // If an error occured let's display the error message
         onFailure: function(err) {
-            $("#resetPasswordMessage").append('<div class="alert alert-danger">'+err.message+'</div>');
+            $("#resetPasswordMessage").append("<div class=\"alert alert-danger\">"+err.message+"</div>");
         },
     });
 
 });
 
-$('#forgotPassword').submit(function(e){
+$("#forgotPassword").submit(function(e){
 
   // Emptying previous error messages
-  $('#forgotPasswordMessage').empty();
+  $("#forgotPasswordMessage").empty();
 
   // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
   AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'});
@@ -351,7 +352,7 @@ $('#forgotPassword').submit(function(e){
         },
         // If an error occured let's display the error message
         onFailure: function(err) {
-            $("#forgotPasswordMessage").append('<div class="alert alert-danger">'+err.message+'</div>');
+            $("#forgotPasswordMessage").append("<div class=\"alert alert-danger\">"+err.message+"</div>");
         },
     });
 });
@@ -371,11 +372,11 @@ $("#signin").submit(function(e){
   });
 
   var authenticationData = {
-    Username : $('#signinUsername').val(),
-    Password : $('#signinPassword').val(),
+    Username : $("#signinUsername").val(),
+    Password : $("#signinPassword").val(),
   };
   var userData = {
-    Username : $('#signinUsername').val(),
+    Username : $("#signinUsername").val(),
     Pool : userPool
   };
   var authenticationDetails = new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
@@ -391,7 +392,7 @@ $("#signin").submit(function(e){
     // If an error occured let's display the error message
     onFailure: function(err) {
       console.log("error authenticating user"+err);
-      $('#signinMessage').append('<div class="alert alert-danger">'+err.message+'</div>');
+      $("#signinMessage").append("<div class=\"alert alert-danger\">"+err.message+"</div>");
     },
     newPasswordRequired: function(userAttributes, requiredAttributes) {
       // User was signed up by an admin and must provide new
@@ -408,28 +409,28 @@ $("#signin").submit(function(e){
         $("#signinNewPasswordGroup").show();
         $("#updatePasswordButton").show();
         $("#loginButton").hide();
-        $('#signinMessage').append('<div class="alert alert-danger">Your password is epxired, please provide a new one</div>');
-        $('#signinMessage').show();
+        $("#signinMessage").append("<div class=\"alert alert-danger\">Your password is epxired, please provide a new one</div>");
+        $("#signinMessage").show();
 
       }
       // The user entered a new password
       // Let's update it in Cognito User Pool
       else {
-        userAttributes['name']=$('#signinUsername').val()
+        userAttributes['name']=$("#signinUsername").val()
 
         // the api doesn't accept this field back
         delete userAttributes.email_verified;
 
         // Update user password and log the user in
-        cognitoUser.completeNewPasswordChallenge($('#signinNewPassword').val(), userAttributes, {
+        cognitoUser.completeNewPasswordChallenge($("#signinNewPassword").val(), userAttributes, {
           onSuccess: function(result) {
             //
             localStorage.setItem("token", JSON.stringify(result.idToken.jwtToken));
             localStorage.setItem("accessToken", JSON.stringify(result.getAccessToken().getJwtToken()));
 
-            $('#signinMessage').append('<div class="alert alert-success">Password succesfully updated \
-                                               <br> \
-                                               you will be redirected to the home page shortly</div>');
+            $("#signinMessage").append("<div class=\"alert alert-success\">Password succesfully updated \n"+
+                                               "<br> \n"+
+                                               "you will be redirected to the home page shortly</div>");
 
             // Redirecting the user to the home page after 3 seconds
              window.setTimeout(function () {
@@ -439,7 +440,7 @@ $("#signin").submit(function(e){
           },
           // If an error occured let's display the error message
           onFailure: function(error) {
-            $('#signinMessage').append('<div class="alert alert-danger">'+error.message+'</div>');
+            $("#signinMessage").append("<div class=\"alert alert-danger\">"+error.message+"</div>");
           }
         });
       }
@@ -448,7 +449,7 @@ $("#signin").submit(function(e){
 })
 
 
-$('#register').submit(function(e){
+$("#register").submit(function(e){
   $("#registerMessage").empty();
   e.preventDefault();
   var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
@@ -461,14 +462,14 @@ $('#register').submit(function(e){
 
   var params = {
     UserPoolId: config.userPoolId,
-    Username: $('#username').val(),
+    Username: $("#username").val(),
     DesiredDeliveryMediums: ['EMAIL' ],
     ForceAliasCreation: false,
     TemporaryPassword: generatePassword(),
     UserAttributes: [
       {
         Name: 'email',
-        Value: $('#email').val(),
+        Value: $("#email").val(),
       },
       // Users are created by admin so no need to verify email
       {
@@ -480,11 +481,11 @@ $('#register').submit(function(e){
   cognitoidentityserviceprovider.adminCreateUser(params, function(err, data) {
     if (err)
     {
-      $("#registerMessage").append('<div class="alert alert-danger">Error while creating the user</div>');
+      $("#registerMessage").append("<div class=\"alert alert-danger\">Error while creating the user</div>");
     }
     else
     {
-        $("#registerMessage").append('<div class="alert alert-success">User successfuly created</div>');
+        $("#registerMessage").append("<div class=\"alert alert-success\">User successfuly created</div>");
         $("#register :input").prop("disabled", true);
     }
   });
