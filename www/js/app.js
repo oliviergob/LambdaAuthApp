@@ -12,7 +12,7 @@ function loadCredentials(callback)
   if(localStorage.getItem("token"))
   {
     var logins = {}
-    logins['cognito-idp.'+config.region+'.amazonaws.com/'+config.userPoolId] = JSON.parse(localStorage.getItem("token"));
+    logins["cognito-idp."+config.region+".amazonaws.com/"+config.userPoolId] = JSON.parse(localStorage.getItem("token"));
 
     // Thanks to our ID Token Cognito Federated Identity is providing us
     // with some AWS credentials that we will use later on for API calls
@@ -68,7 +68,7 @@ function logout(){
   // Clearing the tokens and other info stored in localstorage
   localStorage.clear();
   window.location = "/";
-};
+}
 
 
 
@@ -104,7 +104,7 @@ function loadBasicData(){
         }
         else {
           data=JSON.parse(data.Payload);
-          if(data.httpStatus == 200){
+          if(data.httpStatus === 200){
             $("#basicData").append("<div class=\"alert alert-success\">"+ data.value +"</div>");
           } else {
             $("#basicData").append("<div class=\"alert alert-danger\">"+ data.message +"</div>");
@@ -142,7 +142,7 @@ function loadSensitiveData(){
     // Invoking the lambda function using the AWS credentials already set
     // by the loadCredentials() function
     lambda.invoke({
-        FunctionName: 'adminDataAccess',
+        FunctionName: "adminDataAccess",
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
@@ -416,7 +416,7 @@ $("#signin").submit(function(e){
       // The user entered a new password
       // Let's update it in Cognito User Pool
       else {
-        userAttributes['name']=$("#signinUsername").val()
+        userAttributes["name"]=$("#signinUsername").val();
 
         // the api doesn't accept this field back
         delete userAttributes.email_verified;
@@ -448,53 +448,6 @@ $("#signin").submit(function(e){
   });
 })
 
-
-$("#register").submit(function(e){
-  $("#registerMessage").empty();
-  e.preventDefault();
-  var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
-
-  var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool({
-    UserPoolId : config.userPoolId,
-    ClientId : config.userPoolClientId
-  });
-
-
-  var params = {
-    UserPoolId: config.userPoolId,
-    Username: $("#username").val(),
-    DesiredDeliveryMediums: ['EMAIL' ],
-    ForceAliasCreation: false,
-    TemporaryPassword: generatePassword(),
-    UserAttributes: [
-      {
-        Name: 'email',
-        Value: $("#email").val(),
-      },
-      // Users are created by admin so no need to verify email
-      {
-        Name: 'email_verified',
-        Value: 'True'
-      }
-    ]
-  };
-  cognitoidentityserviceprovider.adminCreateUser(params, function(err, data) {
-    if (err)
-    {
-      $("#registerMessage").append("<div class=\"alert alert-danger\">Error while creating the user</div>");
-    }
-    else
-    {
-        $("#registerMessage").append("<div class=\"alert alert-success\">User successfuly created</div>");
-        $("#register :input").prop("disabled", true);
-    }
-  });
-
-
-
-})
-
-
 // Function to generate a 10 to 13 character long password
 // with at least one of the following:
 //   - Lowercase character
@@ -502,17 +455,17 @@ $("#register").submit(function(e){
 //   - Special character
 //   - Number
 function generatePassword () {
-  var specials = '!@#$%^&*()_+{}:"<>?\|[];\',./`~';
-  var lowercase = 'abcdefghijklmnopqrstuvwxyz';
-  var uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  var numbers = '0123456789';
+  var specials = "!@#$%^&*()_+{}:\"<>?\|[];\',./`~";
+  var lowercase = "abcdefghijklmnopqrstuvwxyz";
+  var uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  var numbers = "0123456789";
 
   var all = specials + lowercase + uppercase + numbers;
 
   String.prototype.pick = function(min, max) {
       var n, chars = '';
 
-      if (typeof max === 'undefined') {
+      if (typeof max === "undefined") {
           n = min;
       } else {
           n = min + Math.floor(Math.random() * (max - min));
@@ -545,3 +498,49 @@ function generatePassword () {
 
     return(password);
 }
+
+
+$("#register").submit(function(e){
+  $("#registerMessage").empty();
+  e.preventDefault();
+  var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
+
+  var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool({
+    UserPoolId : config.userPoolId,
+    ClientId : config.userPoolClientId
+  });
+
+
+  var params = {
+    UserPoolId: config.userPoolId,
+    Username: $("#username").val(),
+    DesiredDeliveryMediums: ["EMAIL" ],
+    ForceAliasCreation: false,
+    TemporaryPassword: generatePassword(),
+    UserAttributes: [
+      {
+        Name: "email",
+        Value: $("#email").val(),
+      },
+      // Users are created by admin so no need to verify email
+      {
+        Name: "email_verified",
+        Value: "True"
+      }
+    ]
+  };
+  cognitoidentityserviceprovider.adminCreateUser(params, function(err, data) {
+    if (err)
+    {
+      $("#registerMessage").append("<div class=\"alert alert-danger\">Error while creating the user</div>");
+    }
+    else
+    {
+        $("#registerMessage").append("<div class=\"alert alert-success\">User successfuly created</div>");
+        $("#register :input").prop("disabled", true);
+    }
+  });
+
+
+
+})

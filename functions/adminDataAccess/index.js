@@ -3,16 +3,6 @@ console.log("Loading function");
 exports.handler = (event, context, callback) => {
 	var key = event.key;
 
-	validateMandatoryParam(key, "key", callback);
-
-	var data = {
-			httpStatus : 200,
-      type: "Admin User Data",
-      value: "Some super important data"
-    };
-
-	callback(null, data);
-
 	function validateMandatoryParam(varToValidate, varName, callback)
 	{
 		if ( varToValidate == null )
@@ -30,4 +20,14 @@ exports.handler = (event, context, callback) => {
 		}
 	}
 
-}
+	validateMandatoryParam(key, "key", callback);
+
+	var data = {
+			httpStatus : 200,
+      type: "Admin User Data",
+      value: "Some super important data"
+    };
+
+	callback(null, data);
+
+};
