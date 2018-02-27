@@ -44,7 +44,7 @@
                   ]
                },
                "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"],
-               "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "LambdaExecutionRole" ] ] },
+               "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "LambdaExecutionRole" ] ] }
              }
           },
           "basicDataAccess": {
@@ -56,7 +56,7 @@
               "Code": {"ZipFile": "return 0;" },
               "Runtime": "nodejs4.3",
               "Timeout": "20",
-              "MemorySize": "128",
+              "MemorySize": "128"
             }
           },
           "adminDataAccess": {
@@ -68,7 +68,7 @@
               "Code": {"ZipFile": "return 0;" },
               "Runtime": "nodejs4.3",
               "Timeout": "20",
-              "MemorySize": "128",
+              "MemorySize": "128"
             }
           },
           "SimpleAuthAppBasicUserRole": {
@@ -91,7 +91,7 @@
                     }
                   ]
                },
-              "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "BasicUserRole" ] ] },
+              "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "BasicUserRole" ] ] }
              }
           },
           "SimpleAuthAppAdminRole": {
@@ -114,7 +114,7 @@
                     }
                   ]
                },
-              "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "AdminRole" ] ] },
+              "RoleName": { "Fn::Join" : [ "", [ { "Ref": "AWS::StackName" }, "AdminRole" ] ] }
              }
           },
           "AllowInvokeBasicDataAccessPolicy":{
