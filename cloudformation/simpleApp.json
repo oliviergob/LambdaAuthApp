@@ -8,13 +8,13 @@
         "CognidoIdentityPoolIdParam" : {
           "Type" : "String",
           "Description" : "Cognito Identity Pool Id",
-          "Default" : "us-east-1:80561d71-faa2-46b1-9cec-dc03226b7f12",
+          "Default" : "us-east-1:80561d71-faa2-46b1-9cec-dc03226b7f12"
         },
         "CognidoUserPoolArnParam" : {
           "Type" : "String",
           "Description" : "Cognito User Pool arn",
-          "Default" : "arn:aws:cognito-idp:us-east-1:546190104433:userpool/us-east-1_j18XflhDT",
-        },
+          "Default" : "arn:aws:cognito-idp:us-east-1:546190104433:userpool/us-east-1_j18XflhDT"
+        }
       },
       "Resources" : {
           "S3Bucket" : {
