@@ -371,7 +371,7 @@ $("#signin").submit(function(e){
   // Emptying previous error messages
   $("#signinMessage").empty();
   // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
-  AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'});
+  AWSCognito.config.update({accessKeyId: "anything", secretAccessKey: "anything"});
 
   var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool({
     UserPoolId : config.userPoolId,
