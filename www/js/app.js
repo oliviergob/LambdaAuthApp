@@ -1,4 +1,3 @@
-
 var username;
 loadCredentials();
 
@@ -8,10 +7,10 @@ function loadCredentials(callback)
   AWSCognito.config.region = config.region;
 
   // If user is authenticated
-  if(localStorage.getItem('token'))
+  if(localStorage.getItem("token"))
   {
     var logins = {}
-    logins['cognito-idp.'+config.region+'.amazonaws.com/'+config.userPoolId] = JSON.parse(localStorage.getItem('token'))
+    logins['cognito-idp.'+config.region+'.amazonaws.com/'+config.userPoolId] = JSON.parse(localStorage.getItem("token"));
 
     // Thanks to our ID Token Cognito Federated Identity is providing us
     // with some AWS credentials that we will use later on for API calls
@@ -21,15 +20,15 @@ function loadCredentials(callback)
     });
 
     // Parsing the identity token to extract the username
-    var token = localStorage.getItem('token');
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace('-', '+').replace('_', '/');
+    var token = localStorage.getItem("token");
+    var base64Url = token.split(".")[1];
+    var base64 = base64Url.replace("-", "+").replace("_", "/");
     username = (JSON.parse(window.atob(base64)))["cognito:username"];
 
     //TODO - Verify the token is still valid and we actually managed to get credentials
 
   }
-  // Make sure the callback is a function​
+  // Making sure the callback is a function
    if (typeof callback === "function") {
        callback();
    }
@@ -41,6 +40,23 @@ $(".nav li").on("click", function() {
     $(".nav li").removeClass("active");
     $(this).addClass("active");
 });
+
+// This function update toggle the login / logout button depending
+// on the user's authentication status
+function updateAuthenticationStatus(){
+  $('#user').empty();
+  $('#login').empty();
+  // retreiving the user's ID Token
+  var user = localStorage.getItem("token");
+  // If the user is authenticated
+  if(user){
+    $('#user').show().append('<a href="#" onclick="logout()">Log out ('+username+')</a>');
+    $('#login').hide();
+  } else {
+    $('#login').show().append('<a href="#"onclick="login()">Log in</a>');
+    $('#user').hide();
+  }
+}
 
 
 $(document).ready(function(){
@@ -56,39 +72,23 @@ function logout(){
   window.location = '/';
 };
 
-// This function update toggle the login / logout button depending
-// on the user's authentication status
-function updateAuthenticationStatus(){
-  $('#user').empty();
-  $('#login').empty();
-  // retreiving the user's ID Token
-  var user = localStorage.getItem('token');
-  // If the user is authenticated
-  if(user){
-    $('#user').show().append('<a href="#" onclick="logout()">Log out ('+username+')</a>');
-    $('#login').hide();
-  } else {
-    $('#login').show().append('<a href="#"onclick="login()">Log in</a>');
-    $('#user').hide();
-  }
-}
 
 
 function loadBasicData(){
-  $('#sensitiveDataContainer').hide();
-  $('#loginContainer').hide();
-  $('#registerUserContainer').hide();
-  $('#resetPasswordContainer').hide();
-  $('#forgotPasswordContainer').hide();
-  $('#changePasswordContainer').hide();
-  $('#basicDataContainer').show();
+  $("#sensitiveDataContainer").hide();
+  $("#loginContainer").hide();
+  $("#registerUserContainer").hide();
+  $("#resetPasswordContainer").hide();
+  $("#forgotPasswordContainer").hide();
+  $("#changePasswordContainer").hide();
+  $("#basicDataContainer").show();
 
 
   // Clearing previous messages
-  $('#basicData').empty();
+  $("#basicData").empty();
 
   // If the user is authenticated (no need to call the API autherwise)
-  if(localStorage.getItem('token')){
+  if(localStorage.getItem("token")){
 
     // Initialising AWS Lambda client
     var lambda = new AWS.Lambda();
@@ -102,14 +102,14 @@ function loadBasicData(){
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
-          $('#basicData').append('<div class="alert alert-danger">Error retreiving data</div>')
+          $('#basicData').append('<div class="alert alert-danger">Error retreiving data</div>');
         }
         else {
           data=JSON.parse(data.Payload);
           if(data.httpStatus == 200){
-            $('#basicData').append('<div class="alert alert-success">'+ data.value +'</div>')
+            $('#basicData').append('<div class="alert alert-success">'+ data.value +'</div>');
           } else {
-            $('#basicData').append('<div class="alert alert-danger">'+ data.message +'</div>')
+            $('#basicData').append('<div class="alert alert-danger">'+ data.message +'</div>');
           }
         }
       });
@@ -118,19 +118,19 @@ function loadBasicData(){
 
 
 function loadSensitiveData(){
-  $('#basicDataContainer').hide();
-  $('#loginContainer').hide();
-  $('#registerUserContainer').hide();
-  $('#resetPasswordContainer').hide();
-  $('#forgotPasswordContainer').hide();
-  $('#changePasswordContainer').hide();
-  $('#sensitiveDataContainer').show();
+  $("#basicDataContainer").hide();
+  $("#loginContainer").hide();
+  $("#registerUserContainer").hide();
+  $("#resetPasswordContainer").hide();
+  $("#forgotPasswordContainer").hide();
+  $("#changePasswordContainer").hide();
+  $("#sensitiveDataContainer").show();
 
   // Clearing previous messages
   $('#sensitiveData').empty();
 
   // If the user is authenticated (no need to call the API autherwise)
-  if(localStorage.getItem('token')){
+  if(localStorage.getItem("token")){
 
     // Initialising AWS Lambda client
     var lambda = new AWS.Lambda();
@@ -143,14 +143,14 @@ function loadSensitiveData(){
         Payload: JSON.stringify(event, null, 2) // pass params
       }, function(error, data) {
         if (error) {
-          $('#sensitiveData').append('<div class="alert alert-danger">Error retreiving data</div>')
+          $('#sensitiveData').append('<div class="alert alert-danger">Error retreiving data</div>');
         }
         else {
           data=JSON.parse(data.Payload);
           if(data.httpStatus == 200){
-            $('#sensitiveData').append('<div class="alert alert-success">'+ data.value +'</div>')
+            $('#sensitiveData').append('<div class="alert alert-success">'+ data.value +'</div>');
           } else {
-            $('#sensitiveData').append('<div class="alert alert-danger">'+ data.message +'</div>')
+            $('#sensitiveData').append('<div class="alert alert-danger">'+ data.message +'</div>');
           }
         }
       });
@@ -158,13 +158,13 @@ function loadSensitiveData(){
 }
 
 function login(){
-  $('#basicDataContainer').hide();
+  $("#basicDataContainer").hide();
 
-  $('#sensitiveDataContainer').hide();
-  $('#registerUserContainer').hide();
-  $('#resetPasswordContainer').hide();
-  $('#forgotPasswordContainer').hide();
-  $('#changePasswordContainer').hide();
+  $("#sensitiveDataContainer").hide();
+  $("#registerUserContainer").hide();
+  $("#resetPasswordContainer").hide();
+  $("#forgotPasswordContainer").hide();
+  $("#changePasswordContainer").hide();
 
   $('#signinMessage').empty();
   $('#signin').trigger("reset");
@@ -173,57 +173,57 @@ function login(){
   $("#updatePasswordButton").hide();
   $("#loginButton").show();
 
-  $('#loginContainer').show();
+  $("#loginContainer").show();
 }
 
 function regsiterUser(){
-  $('#basicDataContainer').hide();
-  $('#loginContainer').hide();
-  $('#sensitiveDataContainer').hide();
-  $('#resetPasswordContainer').hide();
-  $('#forgotPasswordContainer').hide();
-  $('#changePasswordContainer').hide();
+  $("#basicDataContainer").hide();
+  $("#loginContainer").hide();
+  $("#sensitiveDataContainer").hide();
+  $("#resetPasswordContainer").hide();
+  $("#forgotPasswordContainer").hide();
+  $("#changePasswordContainer").hide();
 
   $('#registerMessage').empty();
   $('#register').trigger("reset");
   $("#register :input").prop("disabled", false);
 
-  $('#registerUserContainer').show();
+  $("#registerUserContainer").show();
 
 
 }
 
 function forgotPassword(){
-  $('#basicDataContainer').hide();
-  $('#loginContainer').hide();
-  $('#sensitiveDataContainer').hide();
-  $('#registerUserContainer').hide();
-  $('#resetPasswordContainer').hide();
-  $('#changePasswordContainer').hide();
+  $("#basicDataContainer").hide();
+  $("#loginContainer").hide();
+  $("#sensitiveDataContainer").hide();
+  $("#registerUserContainer").hide();
+  $("#resetPasswordContainer").hide();
+  $("#changePasswordContainer").hide();
 
   $('#forgotPasswordMessage').empty();
   $('#forgotPassword').trigger("reset");
   $("#forgotPassword :input").prop("disabled", false);
 
-  $('#forgotPasswordContainer').show();
+  $("#forgotPasswordContainer").show();
 }
 
 
 
 function resetPassword(){
 
-  $('#basicDataContainer').hide();
-  $('#loginContainer').hide();
-  $('#sensitiveDataContainer').hide();
-  $('#registerUserContainer').hide();
-  $('#changePasswordContainer').hide();
-  $('#forgotPasswordContainer').hide();
+  $("#basicDataContainer").hide();
+  $("#loginContainer").hide();
+  $("#sensitiveDataContainer").hide();
+  $("#registerUserContainer").hide();
+  $("#changePasswordContainer").hide();
+  $("#forgotPasswordContainer").hide();
 
   $('#resetPasswordMessage').empty();
   $('#resetPassword').trigger("reset");
   $("#resetPassword :input").prop("disabled", false);
 
-  $('#resetPasswordContainer').show();
+  $("#resetPasswordContainer").show();
 
 
 }
@@ -231,18 +231,18 @@ function resetPassword(){
 
 function changePassword(){
 
-  $('#basicDataContainer').hide();
-  $('#loginContainer').hide();
-  $('#sensitiveDataContainer').hide();
-  $('#registerUserContainer').hide();
-  $('#resetPasswordContainer').hide();
-  $('#forgotPasswordContainer').hide();
+  $("#basicDataContainer").hide();
+  $("#loginContainer").hide();
+  $("#sensitiveDataContainer").hide();
+  $("#registerUserContainer").hide();
+  $("#resetPasswordContainer").hide();
+  $("#forgotPasswordContainer").hide();
 
   $('#changePasswordMessage').empty();
   $('#changePassword').trigger("reset");
   $("#changePassword :input").prop("disabled", false);
 
-  $('#changePasswordContainer').show();
+  $("#changePasswordContainer").show();
 }
 
 $('#changePassword').submit(function(e){
@@ -382,7 +382,7 @@ $('#signin').submit(function(e){
   cognitoUser.authenticateUser(authenticationDetails, {
     onSuccess: function (result) {
       // Let's store the Id and Access tokens for later use
-      localStorage.setItem('token', JSON.stringify(result.getIdToken().getJwtToken()));
+      localStorage.setItem("token", JSON.stringify(result.getIdToken().getJwtToken()));
       localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
       window.location = '/';
     },
@@ -406,7 +406,7 @@ $('#signin').submit(function(e){
         $("#signinNewPasswordGroup").show();
         $("#updatePasswordButton").show();
         $("#loginButton").hide();
-        $('#signinMessage').append('<div class="alert alert-danger">Your password is epxired, please provide a new one</div>')
+        $('#signinMessage').append('<div class="alert alert-danger">Your password is epxired, please provide a new one</div>');
         $('#signinMessage').show();
 
       }
@@ -422,7 +422,7 @@ $('#signin').submit(function(e){
         cognitoUser.completeNewPasswordChallenge($('#signinNewPassword').val(), userAttributes, {
           onSuccess: function(result) {
             //
-            localStorage.setItem('token', JSON.stringify(result.idToken.jwtToken));
+            localStorage.setItem("token", JSON.stringify(result.idToken.jwtToken));
             localStorage.setItem('accessToken', JSON.stringify(result.getAccessToken().getJwtToken()));
 
             $('#signinMessage').append('<div class="alert alert-success">Password succesfully updated \

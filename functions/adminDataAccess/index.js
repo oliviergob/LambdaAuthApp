@@ -3,7 +3,7 @@ console.log('Loading function');
 exports.handler = (event, context, callback) => {
 	var key = event.key;
 
-	validateMandatoryParam(key, 'key', callback);
+	validateMandatoryParam(key, "key", callback);
 
 	var data = {
 			httpStatus : 200,
