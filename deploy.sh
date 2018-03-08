@@ -59,4 +59,6 @@ for f in $(ls -1); do
   echo "Updating function $f end"
 done
 
+echo "extra test comment - To Be Removed"
+
 cd ..
